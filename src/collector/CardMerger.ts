@@ -18,23 +18,52 @@ export class CardMerger {
     }
     
     // Create maps for efficient Scryfall lookups
-    // Key format: "name|set"
-    const scryfallByNameSetBooster = new Map<string, ScryfallCard>();
+    // Primary: exact name+set matching, Fallback: Arena ID matching
+    const scryfallByName = new Map<string, ScryfallCard>();
+    const scryfallByArenaId = new Map<number, ScryfallCard>();
     
-    // Index Scryfall cards by name and set only (we'll match booster status from 17Lands)
+    // Index Scryfall cards by exact name+set and Arena ID
+    let splitCardsCount = 0;
     for (const card of scryfallCards) {
+      // Primary index: name|set
       const nameSetKey = `${card.name}|${card.set.toLowerCase()}`;
-      scryfallByNameSetBooster.set(nameSetKey, card);
+      scryfallByName.set(nameSetKey, card);
+      
+      // Fallback index: Arena ID (if available)
+      if (card.arena_id) {
+        scryfallByArenaId.set(card.arena_id, card);
+      }
+      
+      // Count split cards for debugging
+      if (card.name.includes(' // ')) {
+        splitCardsCount++;
+      }
     }
+    
+    Logger.debug(`Found ${splitCardsCount} split cards in Scryfall data`);
+    Logger.debug(`Indexed ${scryfallByName.size} cards by name+set, ${scryfallByArenaId.size} cards by Arena ID`);
     
     const mergedCards: MergedCard[] = [];
     let bothSourcesCount = 0;
     let landsOnlyCount = 0;
+    let arenaIdFallbackCount = 0;
     
     // Process ALL 17Lands cards (17Lands is master)
     for (const landsCard of landsCards) {
       const nameSetKey = `${landsCard.name}|${landsCard.expansion.toLowerCase()}`;
-      const scryfallCard = scryfallByNameSetBooster.get(nameSetKey);
+      
+      // Try exact name+set match first
+      let scryfallCard = scryfallByName.get(nameSetKey);
+      let matchType = 'exact';
+      
+      // Fallback to Arena ID match if exact match fails
+      if (!scryfallCard && landsCard.arena_id) {
+        scryfallCard = scryfallByArenaId.get(landsCard.arena_id);
+        if (scryfallCard) {
+          matchType = 'arena_id';
+          arenaIdFallbackCount++;
+        }
+      }
       
       if (scryfallCard) {
         // Found a match - create enriched card
@@ -48,7 +77,7 @@ export class CardMerger {
     }
 
     Logger.debug(`Merge complete: ${mergedCards.length} total cards`);
-    Logger.debug(`Merge breakdown: ${bothSourcesCount} with Scryfall matches, ${landsOnlyCount} 17Lands only`);
+    Logger.debug(`Merge breakdown: ${bothSourcesCount} with Scryfall matches (${arenaIdFallbackCount} via Arena ID fallback), ${landsOnlyCount} 17Lands only`);
     
     // Check for duplicate Arena IDs in merged data
     const mergedArenaIdCounts = new Map<number, number>();

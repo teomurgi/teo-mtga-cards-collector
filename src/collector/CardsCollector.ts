@@ -3,20 +3,20 @@ import { ScryfallCard, LandsCard, MergedCard, CollectionOptions } from '../types
 import { ScryfallDownloader } from './ScryfallDownloader';
 import { LandsDownloader } from './LandsDownloader';
 import { CardMerger } from './CardMerger';
-import { DatabaseWriter } from './DatabaseWriter';
+import { JSONLWriter } from './JSONLWriter';
 import { Logger } from '../utils/Logger';
 
 export class CardsCollector {
   private scryfallDownloader: ScryfallDownloader;
   private landsDownloader: LandsDownloader;
   private cardMerger: CardMerger;
-  private databaseWriter: DatabaseWriter;
+  private jsonlWriter: JSONLWriter;
 
   constructor() {
     this.scryfallDownloader = new ScryfallDownloader();
     this.landsDownloader = new LandsDownloader();
     this.cardMerger = new CardMerger();
-    this.databaseWriter = new DatabaseWriter();
+    this.jsonlWriter = new JSONLWriter();
   }
 
   async collect(options: CollectionOptions): Promise<void> {
@@ -37,29 +37,29 @@ export class CardsCollector {
     const mergedCards = this.cardMerger.merge(scryfallCards, landsCards);
     Logger.success(`Merged data for ${mergedCards.length} unique cards`);
 
-    // Step 4: Write to DuckDB
-    Logger.info(`Writing to DuckDB file: ${options.outputFile}`);
-    await this.databaseWriter.write(mergedCards, options.outputFile);
-    Logger.success('Database written successfully');
+    // Step 4: Write to JSONL
+    Logger.info(`Writing to JSONL file: ${options.outputFile}`);
+    await this.jsonlWriter.write(mergedCards, options.outputFile);
+    Logger.success('JSONL file written successfully');
 
     // Step 5: Show summary
     await this.showSummary(options.outputFile);
   }
 
-  async showInfo(databaseFile: string): Promise<void> {
-    Logger.info(`Analyzing database: ${databaseFile}`);
+  async showInfo(jsonlFile: string): Promise<void> {
+    Logger.info(`Analyzing JSONL file: ${jsonlFile}`);
     
     try {
-      await fs.access(databaseFile);
+      await fs.access(jsonlFile);
     } catch {
-      throw new Error(`Database file not found: ${databaseFile}`);
+      throw new Error(`JSONL file not found: ${jsonlFile}`);
     }
 
-    await this.databaseWriter.showInfo(databaseFile);
+    await this.jsonlWriter.showInfo(jsonlFile);
   }
 
-  private async showSummary(databaseFile: string): Promise<void> {
+  private async showSummary(jsonlFile: string): Promise<void> {
     Logger.info('\n=== COLLECTION SUMMARY ===');
-    await this.databaseWriter.showInfo(databaseFile);
+    await this.jsonlWriter.showInfo(jsonlFile);
   }
 }

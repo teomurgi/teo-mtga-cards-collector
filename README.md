@@ -1,24 +1,24 @@
 # Teo's MTG Arena Cards Collector
 
-A specialized Node.js TypeScript tool for merging 17Lands CSV data with Scryfall JSON data to create a comprehensive MTG card database in DuckDB format.
+A specialized Node.js TypeScript tool for merging 17Lands CSV data with Scryfall JSON data to create a comprehensive MTG card collection in JSONL format.
 
 ## Purpose
 
-This tool is designed to create the most complete and accurate MTG Arena card database by combining:
+This tool is designed to create the most complete and accurate MTG Arena card collection by combining:
 
 - **17Lands CSV Data**: Authoritative Arena ID mappings and current card metadata from [17lands.com](https://17lands.com)
 - **Scryfall JSON Data**: Rich card information including Oracle text, images, pricing, and legalities from [Scryfall](https://scryfall.com)
 
-The result is a DuckDB database that provides both the precision of 17Lands' Arena data and the comprehensiveness of Scryfall's card details.
+The result is a JSONL (JSON Lines) file that provides both the precision of 17Lands' Arena data and the comprehensiveness of Scryfall's card details.
 
 ## Features
 
 - ✅ Downloads latest data from both 17Lands and Scryfall APIs
 - ✅ Intelligent merging by Arena ID and name/set combinations  
 - ✅ Preserves all card variants and booster information
-- ✅ Creates optimized DuckDB database with indexes
+- ✅ Creates JSONL file for easy data processing and analysis
 - ✅ Comprehensive command-line interface
-- ✅ Detailed merge statistics and database analysis
+- ✅ Detailed merge statistics and collection analysis
 - ✅ TypeScript for type safety and better development experience
 
 ## Installation
@@ -29,35 +29,35 @@ npm install
 
 ## Usage
 
-### Collect Cards Database
+### Collect Cards Collection
 
 ```bash
 # Use default URLs (latest data)
 npm run collect
 
 # Or use custom URLs
-npm run dev -- collect --scryfall-url "https://data.scryfall.io/default-cards/default-cards-20250825090922.json" --lands-url "https://17lands-public.s3.amazonaws.com/analysis_data/cards/cards.csv" --output "my_cards.duckdb"
+npm run dev -- collect --scryfall-url "https://data.scryfall.io/default-cards/default-cards-20250825090922.json" --lands-url "https://17lands-public.s3.amazonaws.com/analysis_data/cards/cards.csv" --output "my_cards.jsonl"
 
 # Enable verbose logging
 npm run dev -- collect --verbose
 ```
 
-### Show Database Information
+### Show Collection Information
 
 ```bash
-npm run dev -- info mtg_cards.duckdb
+npm run dev -- info mtg_cards.jsonl
 ```
 
 ## Commands
 
 - `collect` - Download and merge data from 17Lands and Scryfall
-- `info <file>` - Show statistics about a DuckDB database
+- `info <file>` - Show statistics about a JSONL collection file
 
 ## Options
 
 - `--scryfall-url <url>` - Custom Scryfall JSON URL
 - `--lands-url <url>` - Custom 17Lands CSV URL  
-- `--output <file>` - Output DuckDB filename (default: mtg_cards.duckdb)
+- `--output <file>` - Output JSONL filename (default: mtg_cards.jsonl)
 - `--verbose` - Enable detailed logging
 
 ## Data Sources
@@ -72,9 +72,9 @@ npm run dev -- info mtg_cards.duckdb
 - **Provides**: Oracle text, mana costs, images, pricing, legalities
 - **Used as**: Enrichment source for detailed card information
 
-## Database Schema
+## JSONL Format
 
-The generated DuckDB database contains a `cards` table with:
+The generated JSONL file contains one JSON object per line, each representing a card with:
 
 - **Core**: id, arena_id, name, mana_cost, cmc, type_line, oracle_text
 - **Colors**: colors, color_identity, keywords  

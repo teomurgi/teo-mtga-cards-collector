@@ -1,7 +1,7 @@
 {
   "name": "teo-mtga-cards-collector",
   "version": "1.0.0",
-  "description": "A specialized Node.js TypeScript tool for merging 17Lands CSV data with Scryfall JSON data to create a DuckDB card database",
+  "description": "A specialized Node.js TypeScript tool for merging 17Lands CSV data with Scryfall JSON data to create a JSONL card collection file",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -18,8 +18,8 @@
     "17lands",
     "scryfall",
     "cards",
-    "database",
-    "duckdb",
+    "collection",
+    "jsonl",
     "typescript"
   ],
   "author": "Matteo Murgida <teomurgi@gmail.com>",
@@ -35,8 +35,7 @@
   },
   "dependencies": {
     "commander": "^11.0.0",
-    "csv-parser": "^3.0.0",
-    "duckdb": "^0.9.0"
+    "csv-parser": "^3.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -35,6 +35,7 @@ logs/
 # Database files (development)
 *.duckdb
 *.db
+*.jsonl
 
 # Temporary files
 tmp/
