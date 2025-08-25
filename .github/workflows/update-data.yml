@@ -74,18 +74,9 @@ jobs:
         TOTAL_CARDS=$(jq -r 'select(.total) | .total' docs/collection-stats.json || echo "Unknown")
         BOTH_SOURCE=$(jq -r 'select(.source=="both") | .count' docs/collection-stats.json || echo "Unknown")
         
+        # Create release with simpler notes to avoid YAML escaping issues
         gh release create "data-$TIMESTAMP" \
           docs/mtg_cards.jsonl \
           --title "MTG Cards Data - $DATE" \
-          --notes "🃏 Daily MTG Arena Cards Collection
-
-📊 Collection Statistics:
-- Total Cards: $TOTAL_CARDS
-- Cross-source Matches: $BOTH_SOURCE
-- Generated: $(date)
-- Data Sources: 17Lands + Scryfall
-
-🔗 View Online: https://teomurgi.github.io/teo-mtga-cards-collector/
-
-📥 Download: mtg_cards.jsonl attached to this release" \
+          --notes "Daily MTG Arena Cards Collection - Total Cards: $TOTAL_CARDS - Cross-source Matches: $BOTH_SOURCE - Generated: $(date) - Data Sources: 17Lands + Scryfall - View Online: https://teomurgi.github.io/teo-mtga-cards-collector/" \
           --latest
