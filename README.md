@@ -79,9 +79,15 @@ npm run collect -- --output my_collection.jsonl
 ### Advanced Usage
 
 ```bash
-# Use specific data URLs
+# Check latest Scryfall data info
+npm run collect -- scryfall-info
+
+# Use specific Scryfall URL (optional - defaults to latest)
+npm run collect -- --scryfall-url "https://data.scryfall.io/default-cards/default-cards-20250825211243.json"
+
+# Full command with custom URLs and output
 npm run dev -- collect \
-  --scryfall-url "https://data.scryfall.io/default-cards/default-cards-20250825090922.json" \
+  --scryfall-url "https://data.scryfall.io/default-cards/default-cards-20250825211243.json" \
   --lands-url "https://17lands-public.s3.amazonaws.com/analysis_data/cards/cards.csv" \
   --output "my_cards.jsonl"
 
@@ -93,14 +99,15 @@ npm run dev -- info mtg_cards.jsonl
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `collect` | Download and merge card data | `npm run collect` |
+| `collect` | Download and merge card data (auto-fetches latest Scryfall data) | `npm run collect` |
 | `info <file>` | Show collection statistics | `npm run info` |
+| `scryfall-info` | Show latest Scryfall data information | `npm run collect -- scryfall-info` |
 
 ### Command Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--scryfall-url` | Custom Scryfall JSON URL | Latest daily export |
+| `--scryfall-url` | Custom Scryfall JSON URL | **Auto-fetched latest daily export** |
 | `--lands-url` | Custom 17Lands CSV URL | Latest cards.csv |
 | `--output` | Output filename | `mtg_cards.jsonl` |
 | `--verbose` | Detailed logging | `false` |
@@ -113,9 +120,11 @@ npm run dev -- info mtg_cards.jsonl
 - **Role**: Master source for Arena ID mapping and meta information
 
 ### Scryfall JSON  
-- **URL**: `https://data.scryfall.io/default-cards/default-cards-*.json`
+- **URL**: `https://data.scryfall.io/default-cards/default-cards-*.json` *(automatically detected)*
+- **API**: Uses Scryfall Bulk Data API to fetch latest daily export
 - **Provides**: Oracle text, mana costs, images, pricing, legalities, comprehensive metadata
 - **Role**: Enrichment source for detailed card information
+- **Auto-Update**: ✅ Always uses the most recent available data
 
 ## 📄 Output Format
 
@@ -151,6 +160,30 @@ Each line in the JSONL file represents a complete card with merged data:
 | **Market** | `prices_usd`, `prices_usd_foil` |
 | **Legalities** | `legalities_standard`, `legalities_modern`, `legalities_commander` |
 | **Metadata** | `source`, `created_at`, `foil`, `nonfoil`, `is_booster` |
+
+## 🔄 Automatic Data Updates
+
+### Smart Scryfall Integration
+The tool now **automatically fetches the latest Scryfall data** without requiring hardcoded URLs:
+
+- ✅ **Auto-Discovery**: Uses Scryfall's Bulk Data API to find the newest daily export
+- ✅ **Always Current**: No more outdated hardcoded URLs - always gets the latest data
+- ✅ **Fallback Safety**: Falls back to a known good URL if API is unavailable
+- ✅ **Transparency**: Shows exact timestamp and file size of the data being used
+
+```bash
+# Check what's the latest available
+npm run collect -- scryfall-info
+
+# Automatically uses latest (no URL needed)
+npm run collect
+
+# Still supports manual URLs if needed
+npm run collect -- --scryfall-url "https://data.scryfall.io/..."
+```
+
+**Before**: Had to manually update hardcoded URLs every time Scryfall updated  
+**Now**: Automatically detects and uses the latest available data ✨
 
 ## 🌐 Live Data & GitHub Pages
 
