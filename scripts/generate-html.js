@@ -24,8 +24,10 @@ function generateHTML() {
   
   // Generate preview cards (first 1000) with full card data for details
   const previewCards = allCards.slice(0, 1000);
+  const totalCards = allCards.length;
+  const isPreviewMode = previewCards.length < totalCards;
   
-  // Create card lookup object for details modal
+  // Create card lookup object for details modal (will be expanded for full dataset)
   const cardLookup = {};
   previewCards.forEach(card => {
     cardLookup[`${card.arena_id}_${card.set_code}`] = card;
@@ -200,10 +202,47 @@ function generateHTML() {
         <div class="row">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">📋 Cards Preview (First 1,000 cards) - Click any row for details</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1" id="tableTitle">
+                                📋 <span id="dataMode">${isPreviewMode ? 'Preview Mode' : 'Full Collection'}</span> 
+                                - <span id="cardCount">${previewCards.length.toLocaleString()}</span> cards
+                            </h5>
+                            <small class="text-muted" id="tableSubtitle">
+                                ${isPreviewMode ? 
+                                    `Showing first ${previewCards.length.toLocaleString()} of ${totalCards.toLocaleString()} total cards • Click any row for details` : 
+                                    `Showing all ${totalCards.toLocaleString()} cards • Click any row for details`
+                                }
+                            </small>
+                        </div>
+                        ${isPreviewMode ? `
+                        <div>
+                            <button class="btn btn-outline-primary" id="loadFullButton" onclick="loadFullDataset()">
+                                <i class="fas fa-expand-arrows-alt"></i> Load All ${totalCards.toLocaleString()} Cards
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
                     <div class="card-body">
+                        <!-- Data Mode Alert -->
+                        <div class="alert alert-info d-flex align-items-center" id="dataModeAlert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div>
+                                <strong id="alertTitle">${isPreviewMode ? 'Preview Mode Active' : 'Full Dataset Loaded'}</strong>
+                                <div id="alertMessage">
+                                    ${isPreviewMode ? 
+                                        `Currently showing the first ${previewCards.length.toLocaleString()} cards for faster loading. Use search to find specific cards, or load the full dataset to browse all ${totalCards.toLocaleString()} cards.` :
+                                        `All ${totalCards.toLocaleString()} cards are loaded and searchable.`
+                                    }
+                                </div>
+                            </div>
+                            ${isPreviewMode ? `
+                            <button class="btn btn-sm btn-outline-primary ms-auto" onclick="loadFullDataset()">
+                                Load Full Dataset
+                            </button>
+                            ` : ''}
+                        </div>
+                        
                         <div class="table-responsive">
                             <table id="cardsTable" class="table table-striped table-hover">
                                 <thead>
@@ -299,9 +338,18 @@ function generateHTML() {
         // Card lookup data for modal
         const cardLookup = ${JSON.stringify(cardLookup, null, 2)};
         
+        // Dataset state management
+        let isFullDatasetLoaded = ${!isPreviewMode};
+        let allCardsData = null;
+        let currentTable = null;
+        
+        // Total cards count for UI updates
+        const totalCardsCount = ${totalCards};
+        const previewCardsCount = ${previewCards.length};
+        
         $(document).ready(function() {
             // Initialize DataTable with enhanced search
-            const table = $('#cardsTable').DataTable({
+            currentTable = $('#cardsTable').DataTable({
                 pageLength: 25,
                 responsive: true,
                 order: [[1, 'asc']], // Sort by name
@@ -314,7 +362,7 @@ function generateHTML() {
             
             // Global search functionality
             $('#globalSearch').on('keyup', function() {
-                table.search(this.value).draw();
+                currentTable.search(this.value).draw();
             });
             
             // Row click handler for card details
@@ -323,9 +371,142 @@ function generateHTML() {
                 const card = cardLookup[cardId];
                 if (card) {
                     showCardDetails(card);
+                } else if (!isFullDatasetLoaded) {
+                    // Card not in preview, suggest loading full dataset
+                    showCardNotInPreview();
                 }
             });
         });
+        
+        function loadFullDataset() {
+            const loadButton = document.getElementById('loadFullButton');
+            const alertTitle = document.getElementById('alertTitle');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            // Show loading state
+            loadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            loadButton.disabled = true;
+            
+            // Fetch full JSONL data
+            fetch('mtg_cards.jsonl')
+                .then(response => response.text())
+                .then(data => {
+                    // Parse all cards
+                    allCardsData = data.split('\\n')
+                        .filter(line => line.trim())
+                        .map(line => JSON.parse(line));
+                    
+                    // Update card lookup with all cards
+                    allCardsData.forEach(card => {
+                        cardLookup[\`\${card.arena_id}_\${card.set_code}\`] = card;
+                    });
+                    
+                    // Destroy current table
+                    currentTable.destroy();
+                    
+                    // Replace table body with all cards
+                    const tbody = document.querySelector('#cardsTable tbody');
+                    tbody.innerHTML = generateTableRows(allCardsData);
+                    
+                    // Reinitialize DataTable
+                    currentTable = $('#cardsTable').DataTable({
+                        pageLength: 25,
+                        responsive: true,
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: [0] },
+                            { searchable: false, targets: [0] }
+                        ],
+                        dom: 'lrtip'
+                    });
+                    
+                    // Update global search
+                    $('#globalSearch').off('keyup').on('keyup', function() {
+                        currentTable.search(this.value).draw();
+                    });
+                    
+                    // Update UI state
+                    isFullDatasetLoaded = true;
+                    updateUIForFullDataset();
+                    
+                    console.log(\`✅ Loaded full dataset: \${allCardsData.length.toLocaleString()} cards\`);
+                })
+                .catch(error => {
+                    console.error('Failed to load full dataset:', error);
+                    loadButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to Load';
+                    loadButton.disabled = false;
+                    
+                    // Show error alert
+                    const alert = document.getElementById('dataModeAlert');
+                    alert.className = 'alert alert-danger d-flex align-items-center';
+                    alertTitle.textContent = 'Failed to Load Full Dataset';
+                    alertMessage.textContent = 'There was an error loading the complete collection. Please try again or download the JSONL file directly.';
+                });
+        }
+        
+        function updateUIForFullDataset() {
+            // Update header
+            document.getElementById('dataMode').textContent = 'Full Collection';
+            document.getElementById('cardCount').textContent = totalCardsCount.toLocaleString();
+            document.getElementById('tableSubtitle').textContent = \`Showing all \${totalCardsCount.toLocaleString()} cards • Click any row for details\`;
+            
+            // Update alert
+            const alert = document.getElementById('dataModeAlert');
+            alert.className = 'alert alert-success d-flex align-items-center';
+            document.getElementById('alertTitle').textContent = 'Full Dataset Loaded';
+            document.getElementById('alertMessage').textContent = \`All \${totalCardsCount.toLocaleString()} cards are now loaded and searchable.\`;
+            
+            // Hide load button
+            const loadButton = document.getElementById('loadFullButton');
+            if (loadButton) loadButton.style.display = 'none';
+            
+            // Remove load button from alert
+            const alertLoadButton = alert.querySelector('button');
+            if (alertLoadButton) alertLoadButton.remove();
+        }
+        
+        function generateTableRows(cards) {
+            return cards.map(card => \`
+                <tr class="clickable-row" data-card-id="\${card.arena_id}_\${card.set_code}">
+                    <td>
+                        \${card.image_uris_normal ? 
+                            \`<img src="\${card.image_uris_normal}" class="card-image" alt="\${escapeHtml(card.name)}" loading="lazy">\` : 
+                            '<div class="card-image bg-light d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>'
+                        }
+                    </td>
+                    <td><strong>\${escapeHtml(card.name)}</strong></td>
+                    <td><span class="mana-cost">\${escapeHtml(card.mana_cost || '')}</span></td>
+                    <td>\${escapeHtml(card.type_line || card.types || '')}</td>
+                    <td><span class="rarity-\${card.rarity}">\${capitalize(card.rarity || 'unknown')}</span></td>
+                    <td>
+                        <span class="badge bg-secondary">\${card.set_code}</span>
+                        \${card.set_name ? \`<br><small>\${escapeHtml(card.set_name)}</small>\` : ''}
+                    </td>
+                    <td>
+                        <span class="badge badge-source \${card.source === 'both' ? 'bg-success' : 'bg-warning'}">\${card.source === 'both' ? 'Matched' : '17Lands'}</span>
+                    </td>
+                    <td>\${card.arena_id}</td>
+                </tr>
+            \`).join('');
+        }
+        
+        function showCardNotInPreview() {
+            // Show a modal suggesting to load full dataset
+            const modal = new bootstrap.Modal(document.getElementById('cardDetailModal'));
+            document.getElementById('cardDetailModalLabel').textContent = 'Card Not in Preview';
+            document.getElementById('cardDetailBody').innerHTML = \`
+                <div class="text-center py-4">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5>Card Details Not Available in Preview Mode</h5>
+                    <p class="text-muted">This card is not included in the first \${previewCardsCount.toLocaleString()} cards shown in preview mode.</p>
+                    <button class="btn btn-primary" onclick="modal.hide(); loadFullDataset();">
+                        <i class="fas fa-expand-arrows-alt"></i> Load Full Dataset (\${totalCardsCount.toLocaleString()} cards)
+                    </button>
+                </div>
+            \`;
+            document.getElementById('scryfallLink').style.display = 'none';
+            modal.show();
+        }
         
         function showCardDetails(card) {
             const modalBody = document.getElementById('cardDetailBody');
@@ -417,7 +598,6 @@ function generateHTML() {
         }
         
         function applyAdvancedFilters() {
-            const table = $('#cardsTable').DataTable();
             const rarity = document.getElementById('rarityFilter').value;
             const source = document.getElementById('sourceFilter').value;
             const manaCost = document.getElementById('manaCostFilter').value;
@@ -430,7 +610,7 @@ function generateHTML() {
             if (manaCost) searchTerms.push(manaCost);
             if (setCode) searchTerms.push(setCode.toUpperCase());
             
-            table.search(searchTerms.join(' ')).draw();
+            currentTable.search(searchTerms.join(' ')).draw();
         }
         
         function clearAdvancedFilters() {
@@ -440,12 +620,18 @@ function generateHTML() {
             document.getElementById('setFilter').value = '';
             document.getElementById('globalSearch').value = '';
             
-            const table = $('#cardsTable').DataTable();
-            table.search('').draw();
+            currentTable.search('').draw();
         }
         
         function capitalize(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
