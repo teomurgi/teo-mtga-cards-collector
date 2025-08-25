@@ -1,0 +1,91 @@
+name: Update MTG Cards Data
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC (after 17Lands typically updates)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    branches: [ main ]
+    paths: [ 'src/**', 'package*.json' ] # Only run when code changes
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Collect MTG cards data
+      run: |
+        echo "Starting data collection at $(date)"
+        npm run collect -- --verbose --output docs/mtg_cards.jsonl
+        echo "Data collection completed at $(date)"
+    
+    - name: Generate statistics
+      run: |
+        echo "Generating collection statistics..."
+        npm run info docs/mtg_cards.jsonl > docs/stats.txt
+    
+    - name: Generate HTML page
+      run: |
+        node scripts/generate-html.js
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./docs
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+    
+    - name: Create release with data
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create a release with the generated data
+        DATE=$(date +%Y-%m-%d)
+        TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+        
+        # Get collection stats for release notes
+        TOTAL_CARDS=$(jq -r 'select(.total) | .total' docs/collection-stats.json || echo "Unknown")
+        BOTH_SOURCE=$(jq -r 'select(.source=="both") | .count' docs/collection-stats.json || echo "Unknown")
+        
+        gh release create "data-$TIMESTAMP" \
+          docs/mtg_cards.jsonl \
+          --title "MTG Cards Data - $DATE" \
+          --notes "🃏 **Daily MTG Arena Cards Collection**
+
+📊 **Collection Statistics:**
+- Total Cards: $TOTAL_CARDS
+- Cross-source Matches: $BOTH_SOURCE
+- Generated: $(date)
+- Data Sources: 17Lands + Scryfall
+
+🔗 **View Online:** https://teomurgi.github.io/teo-mtga-cards-collector/
+
+📥 **Download:** \`mtg_cards.jsonl\` attached to this release" \
+          --latest

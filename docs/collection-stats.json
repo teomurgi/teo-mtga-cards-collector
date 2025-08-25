@@ -1,0 +1,13 @@
+[
+  {
+    "total": "22174"
+  },
+  {
+    "source": "both",
+    "count": "19671"
+  },
+  {
+    "source": "lands_only",
+    "count": "2503"
+  }
+]
