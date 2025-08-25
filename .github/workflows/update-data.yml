@@ -77,15 +77,15 @@ jobs:
         gh release create "data-$TIMESTAMP" \
           docs/mtg_cards.jsonl \
           --title "MTG Cards Data - $DATE" \
-          --notes "🃏 **Daily MTG Arena Cards Collection**
+          --notes "🃏 Daily MTG Arena Cards Collection
 
-📊 **Collection Statistics:**
+📊 Collection Statistics:
 - Total Cards: $TOTAL_CARDS
 - Cross-source Matches: $BOTH_SOURCE
 - Generated: $(date)
 - Data Sources: 17Lands + Scryfall
 
-🔗 **View Online:** https://teomurgi.github.io/teo-mtga-cards-collector/
+🔗 View Online: https://teomurgi.github.io/teo-mtga-cards-collector/
 
-📥 **Download:** \`mtg_cards.jsonl\` attached to this release" \
+📥 Download: mtg_cards.jsonl attached to this release" \
           --latest
