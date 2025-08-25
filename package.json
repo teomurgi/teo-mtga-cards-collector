@@ -1,0 +1,44 @@
+{
+  "name": "teo-mtga-cards-collector",
+  "version": "1.0.0",
+  "description": "A specialized Node.js TypeScript tool for merging 17Lands CSV data with Scryfall JSON data to create a DuckDB card database",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "clean": "rimraf dist",
+    "lint": "eslint src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "collect": "npm run build && node dist/index.js"
+  },
+  "keywords": [
+    "mtg",
+    "magic-the-gathering",
+    "17lands",
+    "scryfall",
+    "cards",
+    "database",
+    "duckdb",
+    "typescript"
+  ],
+  "author": "Matteo Murgida <teomurgi@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.11",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "csv-parser": "^3.0.0",
+    "duckdb": "^0.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
