@@ -362,7 +362,16 @@ function generateHTML() {
             
             // Global search functionality
             $('#globalSearch').on('keyup', function() {
-                currentTable.search(this.value).draw();
+                applyUnifiedFilter();
+            });
+            
+            // Add event listeners to filter inputs for real-time filtering
+            $('#rarityFilter, #sourceFilter').on('change', function() {
+                applyUnifiedFilter();
+            });
+            
+            $('#manaCostFilter, #setFilter').on('keyup', function() {
+                applyUnifiedFilter();
             });
             
             // Row click handler for card details
@@ -420,10 +429,22 @@ function generateHTML() {
                         dom: 'lrtip'
                     });
                     
-                    // Update global search
+                    // Update global search and filter functionality
                     $('#globalSearch').off('keyup').on('keyup', function() {
-                        currentTable.search(this.value).draw();
+                        applyUnifiedFilter();
                     });
+                    
+                    // Re-add event listeners to filter inputs
+                    $('#rarityFilter, #sourceFilter').off('change').on('change', function() {
+                        applyUnifiedFilter();
+                    });
+                    
+                    $('#manaCostFilter, #setFilter').off('keyup').on('keyup', function() {
+                        applyUnifiedFilter();
+                    });
+                    
+                    // Reapply current filters and search
+                    applyUnifiedFilter();
                     
                     // Update UI state
                     isFullDatasetLoaded = true;
@@ -597,20 +618,53 @@ function generateHTML() {
             modal.show();
         }
         
-        function applyAdvancedFilters() {
+        function applyUnifiedFilter() {
+            // Get search box value
+            const searchText = document.getElementById('globalSearch').value.trim();
+            
+            // Get advanced filter values
             const rarity = document.getElementById('rarityFilter').value;
             const source = document.getElementById('sourceFilter').value;
-            const manaCost = document.getElementById('manaCostFilter').value;
-            const setCode = document.getElementById('setFilter').value;
+            const manaCost = document.getElementById('manaCostFilter').value.trim();
+            const setCode = document.getElementById('setFilter').value.trim();
             
-            // Combine filters
-            let searchTerms = [];
-            if (rarity) searchTerms.push(rarity);
-            if (source) searchTerms.push(source === 'both' ? 'Matched' : '17Lands');
-            if (manaCost) searchTerms.push(manaCost);
-            if (setCode) searchTerms.push(setCode.toUpperCase());
+            // Combine all search terms
+            let combinedSearch = [];
             
-            currentTable.search(searchTerms.join(' ')).draw();
+            // Add search box text first (most important)
+            if (searchText) {
+                combinedSearch.push(searchText);
+            }
+            
+            // Add filter criteria
+            if (rarity) {
+                combinedSearch.push(rarity);
+            }
+            
+            if (source) {
+                // Convert source filter to searchable text
+                if (source === 'matched') {
+                    combinedSearch.push('Matched');
+                } else if (source === '17lands') {
+                    combinedSearch.push('17Lands');
+                }
+            }
+            
+            if (manaCost) {
+                combinedSearch.push(manaCost);
+            }
+            
+            if (setCode) {
+                combinedSearch.push(setCode.toUpperCase());
+            }
+            
+            // Apply the combined search
+            currentTable.search(combinedSearch.join(' ')).draw();
+        }
+
+        function applyAdvancedFilters() {
+            // Use the unified filter function
+            applyUnifiedFilter();
         }
         
         function clearAdvancedFilters() {
@@ -620,7 +674,8 @@ function generateHTML() {
             document.getElementById('setFilter').value = '';
             document.getElementById('globalSearch').value = '';
             
-            currentTable.search('').draw();
+            // Use unified filter to clear everything
+            applyUnifiedFilter();
         }
         
         function capitalize(str) {
