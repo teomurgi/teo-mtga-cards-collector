@@ -8,7 +8,7 @@ function generateHTML() {
   const jsonlPath = path.join(__dirname, '../docs/mtg_cards.jsonl');
   const jsonlData = fs.readFileSync(jsonlPath, 'utf8');
   
-  // Parse cards (first 1000 for demo, full data available via download)
+  // Parse cards for statistics
   const allCards = jsonlData.split('\n')
     .filter(line => line.trim())
     .map(line => JSON.parse(line));
@@ -21,17 +21,8 @@ function generateHTML() {
     path.join(__dirname, '../docs/collection-stats.json'),
     JSON.stringify(githubStats, null, 2)
   );
-  
-  // Generate preview cards (first 1000) with full card data for details
-  const previewCards = allCards.slice(0, 1000);
+
   const totalCards = allCards.length;
-  const isPreviewMode = previewCards.length < totalCards;
-  
-  // Create card lookup object for details modal (will be expanded for full dataset)
-  const cardLookup = {};
-  previewCards.forEach(card => {
-    cardLookup[`${card.arena_id}_${card.set_code}`] = card;
-  });
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -60,19 +51,34 @@ function generateHTML() {
         .oracle-text { line-height: 1.4; }
         .card-detail-header { background: linear-gradient(135deg, #343a40 0%, #495057 100%); color: white; }
         .search-box { 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
         }
         .advanced-search { 
-            background: #f8f9fa; 
-            border-radius: 6px; 
-            padding: 15px; 
-            margin-top: 10px; 
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
         }
         .badge-source { font-size: 0.75em; }
+        .loading-section {
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .spinner-border-lg {
+            width: 3rem;
+            height: 3rem;
+        }
+        .section-divider {
+            border-bottom: 2px solid #dee2e6;
+            margin: 2rem 0;
+        }
     </style>
 </head>
 <body>
@@ -88,205 +94,182 @@ function generateHTML() {
                 </p>
             </div>
         </div>
-        
-        <!-- Enhanced Search Box -->
-        <div class="search-box">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" id="globalSearch" placeholder="Search cards by name, type, text, or set...">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSearch">
-                        <i class="fas fa-filter"></i> Advanced Filters
-                    </button>
-                </div>
-            </div>
-            
-            <div class="collapse advanced-search" id="advancedSearch">
-                <div class="row mt-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Rarity</label>
-                        <select class="form-select" id="rarityFilter">
-                            <option value="">All Rarities</option>
-                            <option value="common">Common</option>
-                            <option value="uncommon">Uncommon</option>
-                            <option value="rare">Rare</option>
-                            <option value="mythic">Mythic</option>
-                            <option value="token">Token</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Source</label>
-                        <select class="form-select" id="sourceFilter">
-                            <option value="">All Sources</option>
-                            <option value="both">Both Sources</option>
-                            <option value="lands_only">17Lands Only</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Mana Cost</label>
-                        <input type="text" class="form-control" id="manaCostFilter" placeholder="e.g., {2}{R}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Set</label>
-                        <input type="text" class="form-control" id="setFilter" placeholder="Set code">
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col">
-                        <button class="btn btn-primary btn-sm" onclick="applyAdvancedFilters()">Apply Filters</button>
-                        <button class="btn btn-secondary btn-sm ms-2" onclick="clearAdvancedFilters()">Clear All</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h3>${stats.total.toLocaleString()}</h3>
-                        <p class="mb-0">Total Cards</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h3>${stats.bothSources.toLocaleString()}</h3>
-                        <p class="mb-0">Matched Cards</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h3>${((stats.bothSources / stats.total) * 100).toFixed(1)}%</h3>
-                        <p class="mb-0">Match Rate</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h3>${stats.splitCards.toLocaleString()}</h3>
-                        <p class="mb-0">Split Cards</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Download Section -->
+
+        <!-- Section 1: Dataset Downloads -->
         <div class="row mb-4">
             <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">📥 Download Complete Dataset</h5>
-                        <p class="card-text">Get the full collection as JSONL format for your projects.</p>
-                        <a href="mtg_cards.jsonl" class="btn btn-primary" download>
-                            Download mtg_cards.jsonl (${(fs.statSync(jsonlPath).size / 1024 / 1024).toFixed(1)} MB)
-                        </a>
-                        <a href="https://github.com/teomurgi/teo-mtga-cards-collector" class="btn btn-outline-secondary ms-2">
-                            View Source Code
-                        </a>
+                <h2 class="h3 mb-3">📥 Dataset Downloads</h2>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Complete Dataset</h5>
+                                <p class="card-text">Download the full MTG Arena cards collection in JSONL format for your projects.</p>
+                                <a href="mtg_cards.jsonl" class="btn btn-primary" download>
+                                    <i class="fas fa-download"></i> Download mtg_cards.jsonl 
+                                    <span class="badge bg-light text-dark ms-1">${(fs.statSync(jsonlPath).size / 1024 / 1024).toFixed(1)} MB</span>
+                                </a>
+                                <a href="https://github.com/teomurgi/teo-mtga-cards-collector" class="btn btn-outline-secondary ms-2">
+                                    <i class="fab fa-github"></i> View Source Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Dataset Stats</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>${stats.total.toLocaleString()}</strong> total cards</li>
+                                    <li><strong>${stats.bothSources.toLocaleString()}</strong> matched cards</li>
+                                    <li><strong>${((stats.bothSources / stats.total) * 100).toFixed(1)}%</strong> match rate</li>
+                                    <li><strong>${stats.splitCards.toLocaleString()}</strong> split cards</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Cards Table -->
-        <div class="row">
+
+        <div class="section-divider"></div>
+
+        <!-- Section 2: Interactive Card Browser -->
+        <div class="row mb-4" id="browserActivationSection">
             <div class="col">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1" id="tableTitle">
-                                📋 <span id="dataMode">${isPreviewMode ? 'Preview Mode' : 'Full Collection'}</span> 
-                                - <span id="cardCount">${previewCards.length.toLocaleString()}</span> cards
-                            </h5>
-                            <small class="text-muted" id="tableSubtitle">
-                                ${isPreviewMode ? 
-                                    `Showing first ${previewCards.length.toLocaleString()} of ${totalCards.toLocaleString()} total cards • Click any row for details` : 
-                                    `Showing all ${totalCards.toLocaleString()} cards • Click any row for details`
-                                }
-                            </small>
-                        </div>
-                        ${isPreviewMode ? `
-                        <div>
-                            <button class="btn btn-outline-primary" id="loadFullButton" onclick="loadFullDataset()">
-                                <i class="fas fa-expand-arrows-alt"></i> Load All ${totalCards.toLocaleString()} Cards
-                            </button>
-                        </div>
-                        ` : ''}
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h2 class="h3 mb-3">🔍 Interactive Card Browser</h2>
+                        <p class="text-muted mb-4">Want to search and filter through all ${totalCards.toLocaleString()} cards in real-time?</p>
+                        <button class="btn btn-primary btn-lg" onclick="activateCardBrowser()">
+                            <i class="fas fa-play"></i> Launch Interactive Browser
+                        </button>
+                        <p class="text-muted mt-2 mb-0">
+                            <small><i class="fas fa-info-circle"></i> This will download and process the full dataset (~${(fs.statSync(jsonlPath).size / 1024 / 1024).toFixed(1)} MB)</small>
+                        </p>
                     </div>
-                    <div class="card-body">
-                        <!-- Data Mode Alert -->
-                        <div class="alert alert-info d-flex align-items-center" id="dataModeAlert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <div>
-                                <strong id="alertTitle">${isPreviewMode ? 'Preview Mode Active' : 'Full Dataset Loaded'}</strong>
-                                <div id="alertMessage">
-                                    ${isPreviewMode ? 
-                                        `Currently showing the first ${previewCards.length.toLocaleString()} cards for faster loading. Use search to find specific cards, or load the full dataset to browse all ${totalCards.toLocaleString()} cards.` :
-                                        `All ${totalCards.toLocaleString()} cards are loaded and searchable.`
-                                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Browser Content (initially hidden) -->
+        <div id="interactiveBrowserContent" style="display: none;">
+        
+            <!-- Search and Filters -->
+            <div class="row mb-4" id="searchSection" style="display: none;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" class="form-control" id="globalSearch" placeholder="Search cards by name, type, text, or set...">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSearch">
+                                        <i class="fas fa-filter"></i> Advanced Filters
+                                    </button>
                                 </div>
                             </div>
-                            ${isPreviewMode ? `
-                            <button class="btn btn-sm btn-outline-primary ms-auto" onclick="loadFullDataset()">
-                                Load Full Dataset
-                            </button>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table id="cardsTable" class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Mana Cost</th>
-                                        <th>Type</th>
-                                        <th>Rarity</th>
-                                        <th>Set</th>
-                                        <th>Source</th>
-                                        <th>Arena ID</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${previewCards.map(card => `
-                                        <tr class="clickable-row" data-card-id="${card.arena_id}_${card.set_code}">
-                                            <td>
-                                                ${card.image_uris_normal ? 
-                                                    `<img src="${card.image_uris_normal}" class="card-image" alt="${escapeHtml(card.name)}" loading="lazy">` : 
-                                                    '<div class="card-image bg-light d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>'
-                                                }
-                                            </td>
-                                            <td><strong>${escapeHtml(card.name)}</strong></td>
-                                            <td><span class="mana-cost">${escapeHtml(card.mana_cost || '')}</span></td>
-                                            <td>${escapeHtml(card.type_line || card.types || '')}</td>
-                                            <td><span class="rarity-${card.rarity}">${capitalize(card.rarity || 'unknown')}</span></td>
-                                            <td>
-                                                <span class="badge bg-secondary">${card.set_code}</span>
-                                                ${card.set_name ? `<br><small>${escapeHtml(card.set_name)}</small>` : ''}
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-source ${card.source === 'both' ? 'bg-success' : 'bg-warning'}">${card.source === 'both' ? 'Matched' : '17Lands'}</span>
-                                            </td>
-                                            <td>${card.arena_id}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                            
+                            <div class="collapse mt-3" id="advancedSearch">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Rarity</label>
+                                        <select class="form-select" id="rarityFilter">
+                                            <option value="">All Rarities</option>
+                                            <option value="common">Common</option>
+                                            <option value="uncommon">Uncommon</option>
+                                            <option value="rare">Rare</option>
+                                            <option value="mythic">Mythic</option>
+                                            <option value="token">Token</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Source</label>
+                                        <select class="form-select" id="sourceFilter">
+                                            <option value="">All Sources</option>
+                                            <option value="both">Both Sources</option>
+                                            <option value="lands_only">17Lands Only</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Mana Cost</label>
+                                        <input type="text" class="form-control" id="manaCostFilter" placeholder="e.g., {2}{R}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Set</label>
+                                        <input type="text" class="form-control" id="setFilter" placeholder="Set code">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col">
+                                        <button class="btn btn-primary btn-sm" onclick="applyUnifiedFilter()">Apply Filters</button>
+                                        <button class="btn btn-secondary btn-sm ms-2" onclick="clearAdvancedFilters()">Clear All</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Loading Section -->
+            <div class="row" id="loadingSection">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="loading-section">
+                                <div class="spinner-border spinner-border-lg text-primary" role="status" aria-hidden="true"></div>
+                                <h5 class="mt-3 mb-2">Loading Card Database</h5>
+                                <p class="text-muted mb-0">Streaming ${totalCards.toLocaleString()} cards...</p>
+                                <div class="progress mt-3" style="width: 300px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" id="loadingProgress"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards Table (initially hidden) -->
+            <div class="row" id="tableSection" style="display: none;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-1">
+                                📋 Full Collection - <span id="cardCount">${totalCards.toLocaleString()}</span> cards
+                            </h5>
+                            <small class="text-muted">All cards loaded and searchable • Click any row for details</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="cardsTable" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Mana Cost</th>
+                                            <th>Type</th>
+                                            <th>Rarity</th>
+                                            <th>Set</th>
+                                            <th>Source</th>
+                                            <th>Arena ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cardsTableBody">
+                                        <!-- Data will be loaded via streaming fetch -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        </div> <!-- End of interactiveBrowserContent -->
 
         <!-- Card Detail Modal -->
         <div class="modal fade" id="cardDetailModal" tabindex="-1" aria-labelledby="cardDetailModalLabel" aria-hidden="true">
@@ -335,20 +318,113 @@ function generateHTML() {
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     
     <script>
-        // Card lookup data for modal
-        const cardLookup = ${JSON.stringify(cardLookup, null, 2)};
-        
-        // Dataset state management
-        let isFullDatasetLoaded = ${!isPreviewMode};
-        let allCardsData = null;
+        // Global variables
+        let allCardsData = [];
+        let cardLookup = {};
         let currentTable = null;
+        let isDataLoaded = false;
+        let browserActivated = false;
         
         // Total cards count for UI updates
         const totalCardsCount = ${totalCards};
-        const previewCardsCount = ${previewCards.length};
         
         $(document).ready(function() {
-            // Initialize DataTable with enhanced search
+            // Don't auto-load - wait for user activation
+            console.log('📄 Page loaded. Interactive browser ready to activate.');
+        });
+        
+        function activateCardBrowser() {
+            if (browserActivated) return;
+            browserActivated = true;
+            
+            // Hide activation section and show browser content
+            document.getElementById('browserActivationSection').style.display = 'none';
+            document.getElementById('interactiveBrowserContent').style.display = 'block';
+            
+            // Start loading the dataset
+            loadFullDatasetStreaming();
+        }
+        
+        async function loadFullDatasetStreaming() {
+            try {
+                // Show loading section
+                document.getElementById('loadingSection').style.display = 'block';
+                
+                const response = await fetch('mtg_cards.jsonl');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                let buffer = '';
+                let loadedCards = 0;
+                const totalEstimated = totalCardsCount;
+                
+                // Show progress
+                const progressBar = document.getElementById('loadingProgress');
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete lines
+                    let lines = buffer.split('\\n');
+                    buffer = lines.pop(); // Keep incomplete line in buffer
+                    
+                    for (const line of lines) {
+                        if (line.trim()) {
+                            try {
+                                const card = JSON.parse(line);
+                                allCardsData.push(card);
+                                cardLookup[\`\${card.arena_id}_\${card.set_code}\`] = card;
+                                loadedCards++;
+                                
+                                // Update progress every 100 cards
+                                if (loadedCards % 100 === 0) {
+                                    const progress = Math.min((loadedCards / totalEstimated) * 100, 100);
+                                    progressBar.style.width = progress + '%';
+                                    progressBar.textContent = \`\${loadedCards.toLocaleString()} / \${totalEstimated.toLocaleString()}\`;
+                                }
+                            } catch (e) {
+                                console.warn('Failed to parse card:', line.substring(0, 100));
+                            }
+                        }
+                    }
+                }
+                
+                // Process final buffer
+                if (buffer.trim()) {
+                    try {
+                        const card = JSON.parse(buffer);
+                        allCardsData.push(card);
+                        cardLookup[\`\${card.arena_id}_\${card.set_code}\`] = card;
+                        loadedCards++;
+                    } catch (e) {
+                        console.warn('Failed to parse final card:', buffer.substring(0, 100));
+                    }
+                }
+                
+                // Complete loading
+                progressBar.style.width = '100%';
+                progressBar.textContent = 'Complete!';
+                
+                console.log(\`✅ Loaded \${allCardsData.length.toLocaleString()} cards via streaming\`);
+                
+                // Initialize the table with all data
+                await initializeTable();
+                
+            } catch (error) {
+                console.error('Failed to load dataset:', error);
+                showLoadingError();
+            }
+        }
+        
+        async function initializeTable() {
+            // Generate table rows
+            const tbody = document.getElementById('cardsTableBody');
+            tbody.innerHTML = generateTableRows(allCardsData);
+            
+            // Initialize DataTable
             currentTable = $('#cardsTable').DataTable({
                 pageLength: 25,
                 responsive: true,
@@ -360,130 +436,24 @@ function generateHTML() {
                 dom: 'lrtip' // Remove default search box since we have custom one
             });
             
-            // Global search functionality
-            $('#globalSearch').on('keyup', function() {
-                applyUnifiedFilter();
-            });
+            // Setup search and filter functionality
+            setupSearchAndFilters();
             
-            // Add event listeners to filter inputs for real-time filtering
-            $('#rarityFilter, #sourceFilter').on('change', function() {
-                applyUnifiedFilter();
-            });
+            // Hide loading, show content
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('searchSection').style.display = 'block';
+            document.getElementById('tableSection').style.display = 'block';
             
-            $('#manaCostFilter, #setFilter').on('keyup', function() {
-                applyUnifiedFilter();
-            });
+            isDataLoaded = true;
             
-            // Row click handler for card details
+            // Add click handlers for card details
             $('#cardsTable tbody').on('click', 'tr.clickable-row', function() {
                 const cardId = $(this).data('card-id');
                 const card = cardLookup[cardId];
                 if (card) {
                     showCardDetails(card);
-                } else if (!isFullDatasetLoaded) {
-                    // Card not in preview, suggest loading full dataset
-                    showCardNotInPreview();
                 }
             });
-        });
-        
-        function loadFullDataset() {
-            const loadButton = document.getElementById('loadFullButton');
-            const alertTitle = document.getElementById('alertTitle');
-            const alertMessage = document.getElementById('alertMessage');
-            
-            // Show loading state
-            loadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            loadButton.disabled = true;
-            
-            // Fetch full JSONL data
-            fetch('mtg_cards.jsonl')
-                .then(response => response.text())
-                .then(data => {
-                    // Parse all cards
-                    allCardsData = data.split('\\n')
-                        .filter(line => line.trim())
-                        .map(line => JSON.parse(line));
-                    
-                    // Update card lookup with all cards
-                    allCardsData.forEach(card => {
-                        cardLookup[\`\${card.arena_id}_\${card.set_code}\`] = card;
-                    });
-                    
-                    // Destroy current table
-                    currentTable.destroy();
-                    
-                    // Replace table body with all cards
-                    const tbody = document.querySelector('#cardsTable tbody');
-                    tbody.innerHTML = generateTableRows(allCardsData);
-                    
-                    // Reinitialize DataTable
-                    currentTable = $('#cardsTable').DataTable({
-                        pageLength: 25,
-                        responsive: true,
-                        order: [[1, 'asc']],
-                        columnDefs: [
-                            { orderable: false, targets: [0] },
-                            { searchable: false, targets: [0] }
-                        ],
-                        dom: 'lrtip'
-                    });
-                    
-                    // Update global search and filter functionality
-                    $('#globalSearch').off('keyup').on('keyup', function() {
-                        applyUnifiedFilter();
-                    });
-                    
-                    // Re-add event listeners to filter inputs
-                    $('#rarityFilter, #sourceFilter').off('change').on('change', function() {
-                        applyUnifiedFilter();
-                    });
-                    
-                    $('#manaCostFilter, #setFilter').off('keyup').on('keyup', function() {
-                        applyUnifiedFilter();
-                    });
-                    
-                    // Reapply current filters and search
-                    applyUnifiedFilter();
-                    
-                    // Update UI state
-                    isFullDatasetLoaded = true;
-                    updateUIForFullDataset();
-                    
-                    console.log(\`✅ Loaded full dataset: \${allCardsData.length.toLocaleString()} cards\`);
-                })
-                .catch(error => {
-                    console.error('Failed to load full dataset:', error);
-                    loadButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to Load';
-                    loadButton.disabled = false;
-                    
-                    // Show error alert
-                    const alert = document.getElementById('dataModeAlert');
-                    alert.className = 'alert alert-danger d-flex align-items-center';
-                    alertTitle.textContent = 'Failed to Load Full Dataset';
-                    alertMessage.textContent = 'There was an error loading the complete collection. Please try again or download the JSONL file directly.';
-                });
-        }
-        
-        function updateUIForFullDataset() {
-            // Update header
-            document.getElementById('dataMode').textContent = 'Full Collection';
-            document.getElementById('cardCount').textContent = totalCardsCount.toLocaleString();
-            document.getElementById('tableSubtitle').textContent = \`Showing all \${totalCardsCount.toLocaleString()} cards • Click any row for details\`;
-            
-            // Update alert
-            const alert = document.getElementById('dataModeAlert');
-            alert.className = 'alert alert-success d-flex align-items-center';
-            document.getElementById('alertTitle').textContent = 'Full Dataset Loaded';
-            document.getElementById('alertMessage').textContent = \`All \${totalCardsCount.toLocaleString()} cards are now loaded and searchable.\`;
-            
-            // Hide load button
-            const loadButton = document.getElementById('loadFullButton');
-            if (loadButton) loadButton.style.display = 'none';
-            
-            // Remove load button from alert
-            const alertLoadButton = alert.querySelector('button');
-            if (alertLoadButton) alertLoadButton.remove();
         }
         
         function generateTableRows(cards) {
@@ -511,114 +481,42 @@ function generateHTML() {
             \`).join('');
         }
         
-        function showCardNotInPreview() {
-            // Show a modal suggesting to load full dataset
-            const modal = new bootstrap.Modal(document.getElementById('cardDetailModal'));
-            document.getElementById('cardDetailModalLabel').textContent = 'Card Not in Preview';
-            document.getElementById('cardDetailBody').innerHTML = \`
-                <div class="text-center py-4">
-                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                    <h5>Card Details Not Available in Preview Mode</h5>
-                    <p class="text-muted">This card is not included in the first \${previewCardsCount.toLocaleString()} cards shown in preview mode.</p>
-                    <button class="btn btn-primary" onclick="modal.hide(); loadFullDataset();">
-                        <i class="fas fa-expand-arrows-alt"></i> Load Full Dataset (\${totalCardsCount.toLocaleString()} cards)
-                    </button>
-                </div>
-            \`;
-            document.getElementById('scryfallLink').style.display = 'none';
-            modal.show();
+        function setupSearchAndFilters() {
+            // Global search functionality
+            $('#globalSearch').on('keyup', function() {
+                applyUnifiedFilter();
+            });
+            
+            // Add event listeners to filter inputs for real-time filtering
+            $('#rarityFilter, #sourceFilter').on('change', function() {
+                applyUnifiedFilter();
+            });
+            
+            $('#manaCostFilter, #setFilter').on('keyup', function() {
+                applyUnifiedFilter();
+            });
         }
         
-        function showCardDetails(card) {
-            const modalBody = document.getElementById('cardDetailBody');
-            const scryfallLink = document.getElementById('scryfallLink');
-            
-            // Prepare card details HTML
-            const detailsHTML = \`
-                <div class="row">
-                    <div class="col-md-4">
-                        \${card.image_uris_normal ? 
-                            \`<img src="\${card.image_uris_normal}" class="modal-card-image img-fluid" alt="\${card.name}">\` : 
-                            '<div class="modal-card-image bg-light d-flex align-items-center justify-content-center"><i class="fas fa-image fa-3x text-muted"></i></div>'
-                        }
-                    </div>
-                    <div class="col-md-8">
-                        <h4>\${card.name}</h4>
-                        <p class="mb-2">
-                            <strong>Mana Cost:</strong> <span class="mana-cost">\${card.mana_cost || 'N/A'}</span>
-                            <span class="ms-3"><strong>CMC:</strong> \${card.cmc || 'N/A'}</span>
-                        </p>
-                        <p class="mb-2"><strong>Type:</strong> \${card.type_line || card.types || 'Unknown'}</p>
-                        <p class="mb-2">
-                            <strong>Rarity:</strong> <span class="rarity-\${card.rarity}">\${capitalize(card.rarity || 'unknown')}</span>
-                            <span class="ms-3"><strong>Set:</strong> \${card.set_code} - \${card.set_name || 'Unknown Set'}</span>
-                        </p>
-                        <p class="mb-2">
-                            <strong>Source:</strong> 
-                            <span class="badge \${card.source === 'both' ? 'bg-success' : 'bg-warning'}">\${card.source === 'both' ? 'Both Sources' : '17Lands Only'}</span>
-                            <span class="ms-3"><strong>Arena ID:</strong> \${card.arena_id}</span>
-                        </p>
-                        \${card.oracle_text ? \`
-                            <div class="mt-3">
-                                <strong>Oracle Text:</strong>
-                                <div class="oracle-text border rounded p-2 mt-1 bg-light">
-                                    \${card.oracle_text.replace(/\\n/g, '<br>')}
-                                </div>
-                            </div>
-                        \` : ''}
-                        \${card.flavor_text ? \`
-                            <div class="mt-3">
-                                <strong>Flavor Text:</strong>
-                                <div class="text-muted fst-italic">"\${card.flavor_text}"</div>
-                            </div>
-                        \` : ''}
-                        \${card.artist ? \`<p class="mt-3 mb-1"><strong>Artist:</strong> \${card.artist}</p>\` : ''}
-                        \${card.collector_number ? \`<p class="mb-1"><strong>Collector Number:</strong> \${card.collector_number}</p>\` : ''}
-                        \${card.prices_usd ? \`<p class="mb-1"><strong>Price (USD):</strong> $\${card.prices_usd}</p>\` : ''}
+        function showLoadingError() {
+            document.getElementById('loadingSection').innerHTML = \`
+                <div class="card">
+                    <div class="card-body">
+                        <div class="loading-section">
+                            <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3 mb-2 text-danger">Failed to Load Dataset</h5>
+                            <p class="text-muted mb-3">There was an error loading the card database.</p>
+                            <button class="btn btn-primary" onclick="location.reload()">
+                                <i class="fas fa-redo"></i> Retry
+                            </button>
+                        </div>
                     </div>
                 </div>
-                
-                \${card.keywords && card.keywords.length > 0 ? \`
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <strong>Keywords:</strong>
-                            <div class="mt-1">
-                                \${card.keywords.map(keyword => \`<span class="badge bg-info me-1">\${keyword}</span>\`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                \` : ''}
-                
-                \${card.legalities_standard || card.legalities_modern || card.legalities_commander ? \`
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <strong>Legalities:</strong>
-                            <div class="mt-1">
-                                \${card.legalities_standard ? \`<span class="badge bg-secondary me-1">Standard: \${card.legalities_standard}</span>\` : ''}
-                                \${card.legalities_modern ? \`<span class="badge bg-secondary me-1">Modern: \${card.legalities_modern}</span>\` : ''}
-                                \${card.legalities_commander ? \`<span class="badge bg-secondary me-1">Commander: \${card.legalities_commander}</span>\` : ''}
-                            </div>
-                        </div>
-                    </div>
-                \` : ''}
             \`;
-            
-            modalBody.innerHTML = detailsHTML;
-            
-            // Set Scryfall link if available
-            if (card.scryfall_uri) {
-                scryfallLink.href = card.scryfall_uri;
-                scryfallLink.style.display = 'inline-block';
-            } else {
-                scryfallLink.style.display = 'none';
-            }
-            
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('cardDetailModal'));
-            modal.show();
         }
         
         function applyUnifiedFilter() {
+            if (!isDataLoaded || !currentTable) return;
+            
             // Get search box value
             const searchText = document.getElementById('globalSearch').value.trim();
             
@@ -643,9 +541,9 @@ function generateHTML() {
             
             if (source) {
                 // Convert source filter to searchable text
-                if (source === 'matched') {
+                if (source === 'both') {
                     combinedSearch.push('Matched');
-                } else if (source === '17lands') {
+                } else if (source === 'lands_only') {
                     combinedSearch.push('17Lands');
                 }
             }
@@ -661,11 +559,6 @@ function generateHTML() {
             // Apply the combined search
             currentTable.search(combinedSearch.join(' ')).draw();
         }
-
-        function applyAdvancedFilters() {
-            // Use the unified filter function
-            applyUnifiedFilter();
-        }
         
         function clearAdvancedFilters() {
             document.getElementById('rarityFilter').value = '';
@@ -676,6 +569,49 @@ function generateHTML() {
             
             // Use unified filter to clear everything
             applyUnifiedFilter();
+        }
+        
+        function showCardDetails(card) {
+            const modalBody = document.getElementById('cardDetailBody');
+            const scryfallLink = document.getElementById('scryfallLink');
+            
+            // Generate detailed card information
+            const detailsHTML = \`
+                <div class="row">
+                    <div class="col-md-5">
+                        \${card.image_uris_normal ? 
+                            \`<img src="\${card.image_uris_normal}" class="img-fluid rounded" alt="\${escapeHtml(card.name)}">\` : 
+                            '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;"><i class="fas fa-image fa-3x text-muted"></i></div>'
+                        }
+                    </div>
+                    <div class="col-md-7">
+                        <h4>\${escapeHtml(card.name)}</h4>
+                        <p><strong>Mana Cost:</strong> \${escapeHtml(card.mana_cost || 'N/A')}</p>
+                        <p><strong>Type:</strong> \${escapeHtml(card.type_line || card.types || 'N/A')}</p>
+                        <p><strong>Rarity:</strong> <span class="rarity-\${card.rarity}">\${capitalize(card.rarity || 'unknown')}</span></p>
+                        <p><strong>Set:</strong> \${card.set_code} - \${escapeHtml(card.set_name || 'Unknown Set')}</p>
+                        <p><strong>Arena ID:</strong> \${card.arena_id}</p>
+                        <p><strong>Source:</strong> <span class="badge \${card.source === 'both' ? 'bg-success' : 'bg-warning'}">\${card.source === 'both' ? 'Both Sources' : '17Lands Only'}</span></p>
+                        \${card.oracle_text ? \`<p><strong>Oracle Text:</strong><br>\${escapeHtml(card.oracle_text).replace(/\\\\n/g, '<br>')}</p>\` : ''}
+                        \${card.power && card.toughness ? \`<p><strong>Power/Toughness:</strong> \${card.power}/\${card.toughness}</p>\` : ''}
+                        \${card.loyalty ? \`<p><strong>Loyalty:</strong> \${card.loyalty}</p>\` : ''}
+                    </div>
+                </div>
+            \`;
+            
+            modalBody.innerHTML = detailsHTML;
+            
+            // Set Scryfall link if available
+            if (card.scryfall_uri) {
+                scryfallLink.href = card.scryfall_uri;
+                scryfallLink.style.display = 'inline-block';
+            } else {
+                scryfallLink.style.display = 'none';
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('cardDetailModal'));
+            modal.show();
         }
         
         function capitalize(str) {
@@ -719,20 +655,6 @@ function generateStats(cards) {
   ];
   
   return { stats, githubStats };
-}
-
-function escapeHtml(text) {
-  if (!text) return '';
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 // Create docs directory if it doesn't exist
