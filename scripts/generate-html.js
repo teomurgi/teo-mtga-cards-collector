@@ -584,7 +584,6 @@ function generateHTML() {
                 return '<tr class="clickable-row" onclick="showCardDetails(' + index + ')">' +
                     '<td class="text-center">' +
                         '<img src="' + imageUrl + '" class="card-image" loading="lazy" ' +
-                             'onerror="this.src=\\'https://via.placeholder.com/40x56/cccccc/666666?text=?\\'" ' +
                              'title="' + (card.name || 'Unknown Card') + '">' +
                     '</td>' +
                     '<td><strong>' + (card.name || 'Unknown') + '</strong></td>' +
@@ -654,17 +653,20 @@ function generateHTML() {
             document.getElementById('cardModalTitle').innerHTML = 
                 '<i class="fas fa-magic me-2"></i>' + (card.name || 'Unknown Card');
             
-            const imageUrl = card.image_uris && card.image_uris.normal ? card.image_uris.normal :
+            const imageUrl = card.image_uris_normal ? card.image_uris_normal :
+                           card.image_uris_large ? card.image_uris_large :
+                           (card.image_uris && card.image_uris.normal) ? card.image_uris.normal :
+                           (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris_normal) ? card.card_faces[0].image_uris_normal :
                            (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris && card.card_faces[0].image_uris.normal) ? card.card_faces[0].image_uris.normal :
-                           'https://via.placeholder.com/400x560/cccccc/666666?text=No+Image';
+                           '';
             
             const rarityClass = getRarityClass(card.rarity);
             const manaCost = formatManaCost(card.mana_cost);
             
             const details = '<div class="row">' +
                     '<div class="col-lg-5">' +
-                        '<img src="' + imageUrl + '" class="card-detail-image w-100" alt="' + (card.name || '') + '" ' +
-                             'onerror="this.src=\\'https://via.placeholder.com/400x560/cccccc/666666?text=No+Image\\'">' +
+                        (imageUrl ? '<img src="' + imageUrl + '" class="card-detail-image w-100" alt="' + (card.name || '') + '">' :
+                         '<div class="card-detail-image w-100 bg-light d-flex align-items-center justify-content-center" style="height: 300px;"><i class="fas fa-image fa-3x text-muted"></i></div>') +
                     '</div>' +
                     '<div class="col-lg-7">' +
                         '<div class="card-info">' +
