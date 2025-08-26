@@ -17,7 +17,7 @@ program
   .description('Download and merge 17Lands and Scryfall data into JSONL file')
   .option('-s, --scryfall-url <url>', 'Scryfall JSON URL (if not provided, fetches latest automatically)')
   .option('-l, --lands-url <url>', '17Lands CSV URL', 'https://17lands-public.s3.amazonaws.com/analysis_data/cards/cards.csv')
-  .option('-o, --output <file>', 'Output JSONL file', 'mtg_cards.jsonl')
+  .option('-o, --output <file>', 'Output JSONL file', 'mtga_cards.jsonl')
   .option('-v, --verbose', 'Enable verbose logging')
   .action(async (options) => {
     try {

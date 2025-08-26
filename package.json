@@ -11,7 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
     "collect": "npm run build && node dist/index.js collect",
-    "info": "npm run build && node dist/index.js info docs/mtg_cards.jsonl",
+    "info": "npm run build && node dist/index.js info docs/mtga_cards.jsonl",
     "generate-site": "node scripts/generate-html.js"
   },
   "keywords": [

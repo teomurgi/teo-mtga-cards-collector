@@ -8,50 +8,15 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .mana-symbol { font-size: 0.8em; }
-        .rarity-common { color: #000; }
-        .rarity-uncommon { color: #c0c0c0; }
-        .rarity-rare { color: #ffd700; }
-        .rarity-mythic { color: #ff4500; }
-        .source-both { background-color: #d4edda; }
-        .source-lands_only { background-color: #fff3cd; }
         .card-image { width: 30px; height: 42px; object-fit: cover; border-radius: 3px; }
-        .stats-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .update-time { font-size: 0.9em; color: #6c757d; }
         .clickable-row { cursor: pointer; }
         .clickable-row:hover { background-color: #f8f9fa; }
-        .modal-card-image { max-width: 200px; border-radius: 8px; }
-        .mana-cost { font-family: 'Courier New', monospace; font-weight: bold; }
-        .oracle-text { line-height: 1.4; }
-        .card-detail-header { background: linear-gradient(135deg, #343a40 0%, #495057 100%); color: white; }
-        .search-box { 
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #dee2e6;
-        }
-        .advanced-search { 
-            background: white;
-            border-radius: 6px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-        .badge-source { font-size: 0.75em; }
         .loading-section {
             min-height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-        }
-        .spinner-border-lg {
-            width: 3rem;
-            height: 3rem;
-        }
-        .section-divider {
-            border-bottom: 2px solid #dee2e6;
-            margin: 2rem 0;
         }
     </style>
 </head>
@@ -61,64 +26,48 @@
         <div class="row mb-4">
             <div class="col">
                 <h1 class="display-4">🃏 MTG Arena Cards Collection</h1>
-                <p class="lead">Comprehensive database merging 17Lands and Scryfall data with 99.70% match rate</p>
-                <p class="update-time">
-                    📅 Last Updated: <strong>8/26/2025, 10:05:14 AM</strong> | 
-                    🔄 Auto-updated daily at 6 AM UTC
-                </p>
+                <p class="lead">Comprehensive database with 22,174 cards</p>
             </div>
         </div>
 
-        <!-- Section 1: Dataset Downloads -->
+        <!-- Downloads -->
         <div class="row mb-4">
-            <div class="col">
-                <h2 class="h3 mb-3">📥 Dataset Downloads</h2>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Complete Dataset</h5>
-                                <p class="card-text">Download the full MTG Arena cards collection in JSONL format for your projects.</p>
-                                <a href="mtg_cards.jsonl" class="btn btn-primary" download>
-                                    <i class="fas fa-download"></i> Download mtg_cards.jsonl 
-                                    <span class="badge bg-light text-dark ms-1">22.1 MB</span>
-                                </a>
-                                <a href="https://github.com/teomurgi/teo-mtga-cards-collector" class="btn btn-outline-secondary ms-2">
-                                    <i class="fab fa-github"></i> View Source Code
-                                </a>
-                            </div>
-                        </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Complete Dataset</h5>
+                        <a href="mtga_cards.jsonl" class="btn btn-primary" download>
+                            Download mtga_cards.jsonl (22.1 MB)
+                        </a>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-title">Dataset Stats</h6>
-                                <ul class="list-unstyled mb-0">
-                                    <li><strong>22,174</strong> total cards</li>
-                                    <li><strong>22,107</strong> matched cards</li>
-                                    <li><strong>99.7%</strong> match rate</li>
-                                    <li><strong>2,122</strong> split cards</li>
-                                </ul>
-                            </div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Stats</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>22,174</strong> total cards</li>
+                            <li><strong>22,107</strong> matched</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="section-divider"></div>
-
-        <!-- Section 2: Interactive Card Browser -->
-        <div class="row mb-4" id="browserActivationSection">
+        <!-- Browser Activation -->
+        <div class="row mb-4" id="activation">
             <div class="col">
                 <div class="card bg-light">
                     <div class="card-body text-center">
-                        <h2 class="h3 mb-3">🔍 Interactive Card Browser</h2>
-                        <p class="text-muted mb-4">Want to search and filter through all 22,174 cards in real-time?</p>
-                        <button class="btn btn-primary btn-lg" onclick="activateCardBrowser()">
+                        <h3>🔍 Interactive Card Browser</h3>
+                        <p>Search and filter 22,174 cards in real-time</p>
+                        
+                        <button class="btn btn-primary btn-lg" onclick="startBrowser()">
                             <i class="fas fa-play"></i> Launch Interactive Browser
                         </button>
-                        <p class="text-muted mt-2 mb-0">
+                        
+                        <p class="text-muted mt-3 mb-0">
                             <small><i class="fas fa-info-circle"></i> This will download and process the full dataset (~22.1 MB)</small>
                         </p>
                     </div>
@@ -126,81 +75,19 @@
             </div>
         </div>
 
-        <!-- Interactive Browser Content (initially hidden) -->
-        <div id="interactiveBrowserContent" style="display: none;">
-        
-            <!-- Search and Filters -->
-            <div class="row mb-4" id="searchSection" style="display: none;">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                        <input type="text" class="form-control" id="globalSearch" placeholder="Search cards by name, type, text, or set...">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSearch">
-                                        <i class="fas fa-filter"></i> Advanced Filters
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="collapse mt-3" id="advancedSearch">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <label class="form-label">Rarity</label>
-                                        <select class="form-select" id="rarityFilter">
-                                            <option value="">All Rarities</option>
-                                            <option value="common">Common</option>
-                                            <option value="uncommon">Uncommon</option>
-                                            <option value="rare">Rare</option>
-                                            <option value="mythic">Mythic</option>
-                                            <option value="token">Token</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Source</label>
-                                        <select class="form-select" id="sourceFilter">
-                                            <option value="">All Sources</option>
-                                            <option value="both">Both Sources</option>
-                                            <option value="lands_only">17Lands Only</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Mana Cost</label>
-                                        <input type="text" class="form-control" id="manaCostFilter" placeholder="e.g., {2}{R}">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Set</label>
-                                        <input type="text" class="form-control" id="setFilter" placeholder="Set code">
-                                    </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col">
-                                        <button class="btn btn-primary btn-sm" onclick="applyUnifiedFilter()">Apply Filters</button>
-                                        <button class="btn btn-secondary btn-sm ms-2" onclick="clearAdvancedFilters()">Clear All</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading Section -->
-            <div class="row" id="loadingSection">
+        <!-- Browser Content -->
+        <div id="browser" style="display: none;">
+            <!-- Loading -->
+            <div class="row" id="loading">
                 <div class="col">
                     <div class="card">
                         <div class="card-body">
                             <div class="loading-section">
-                                <div class="spinner-border spinner-border-lg text-primary" role="status" aria-hidden="true"></div>
-                                <h5 class="mt-3 mb-2">Loading Card Database</h5>
-                                <p class="text-muted mb-0">Streaming 22,174 cards...</p>
+                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                                <h5 class="mt-3" id="loadTitle">Loading...</h5>
+                                <p class="text-muted" id="loadText">Preparing data...</p>
                                 <div class="progress mt-3" style="width: 300px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 0%" id="loadingProgress"></div>
+                                    <div class="progress-bar" id="progress" style="width: 0%">0%</div>
                                 </div>
                             </div>
                         </div>
@@ -208,395 +95,119 @@
                 </div>
             </div>
 
-            <!-- Cards Table (initially hidden) -->
-            <div class="row" id="tableSection" style="display: none;">
+            <!-- Search -->
+            <div class="row mb-3" id="search" style="display: none;">
                 <div class="col">
                     <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-1">
-                                📋 Full Collection - <span id="cardCount">22,174</span> cards
-                            </h5>
-                            <small class="text-muted">All cards loaded and searchable • Click any row for details</small>
-                        </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="cardsTable" class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>Name</th>
-                                            <th>Mana Cost</th>
-                                            <th>Type</th>
-                                            <th>Rarity</th>
-                                            <th>Set</th>
-                                            <th>Source</th>
-                                            <th>Arena ID</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cardsTableBody">
-                                        <!-- Data will be loaded via streaming fetch -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <input type="text" class="form-control" id="searchBox" placeholder="Search cards...">
                         </div>
                     </div>
                 </div>
             </div>
-        
-        </div> <!-- End of interactiveBrowserContent -->
 
-        <!-- Card Detail Modal -->
-        <div class="modal fade" id="cardDetailModal" tabindex="-1" aria-labelledby="cardDetailModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header card-detail-header">
-                        <h5 class="modal-title" id="cardDetailModalLabel">Card Details</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="cardDetailBody">
-                        <!-- Card details will be populated here -->
-                    </div>
-                    <div class="modal-footer">
-                        <a href="#" id="scryfallLink" class="btn btn-outline-primary" target="_blank">
-                            <i class="fas fa-external-link-alt"></i> View on Scryfall
-                        </a>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <!-- Table -->
+            <div class="row" id="tableRow" style="display: none;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <table id="cardsTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Set</th>
+                                        <th>Rarity</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Footer -->
-        <footer class="mt-5 py-4 border-top">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="text-muted mb-2">
-                        🛠️ Built with <a href="https://github.com/teomurgi/teo-mtga-cards-collector">MTG Arena Cards Collector</a><br>
-                        📊 Data from <a href="https://17lands.com/">17Lands</a> and <a href="https://scryfall.com/">Scryfall</a><br>
-                        🔄 Updated daily via GitHub Actions
-                    </p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p class="text-muted mb-2">
-                        👨‍💻 By <a href="https://github.com/teomurgi">Matteo Murgida</a><br>
-                        ⭐ <a href="https://github.com/teomurgi/teo-mtga-cards-collector">Star on GitHub</a>
-                    </p>
-                </div>
-            </div>
-        </footer>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     
     <script>
-        // Global variables
-        let allCardsData = [];
-        let cardLookup = {};
-        let currentTable = null;
-        let isDataLoaded = false;
-        let browserActivated = false;
+        let cards = [];
+        let table = null;
         
-        // Total cards count for UI updates
-        const totalCardsCount = 22174;
-        
-        $(document).ready(function() {
-            // Don't auto-load - wait for user activation
-            console.log('📄 Page loaded. Interactive browser ready to activate.');
-        });
-        
-        function activateCardBrowser() {
-            if (browserActivated) return;
-            browserActivated = true;
-            
-            // Hide activation section and show browser content
-            document.getElementById('browserActivationSection').style.display = 'none';
-            document.getElementById('interactiveBrowserContent').style.display = 'block';
-            
-            // Start loading the dataset
-            loadFullDatasetStreaming();
+        function startBrowser() {
+            document.getElementById('activation').style.display = 'none';
+            document.getElementById('browser').style.display = 'block';
+            loadData();
         }
         
-        async function loadFullDatasetStreaming() {
+        async function loadData() {
             try {
-                // Show loading section
-                document.getElementById('loadingSection').style.display = 'block';
+                updateProgress('Loading card database', 'Downloading 22,174 cards...', 20);
                 
-                const response = await fetch('mtg_cards.jsonl');
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+                const response = await fetch('mtga_cards.jsonl');
+                const text = await response.text();
                 
-                let buffer = '';
-                let loadedCards = 0;
-                const totalEstimated = totalCardsCount;
+                updateProgress('Processing...', 'Parsing cards...', 60);
                 
-                // Show progress
-                const progressBar = document.getElementById('loadingProgress');
-                
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    buffer += decoder.decode(value, { stream: true });
-                    
-                    // Process complete lines
-                    let lines = buffer.split('\n');
-                    buffer = lines.pop(); // Keep incomplete line in buffer
-                    
-                    for (const line of lines) {
-                        if (line.trim()) {
-                            try {
-                                const card = JSON.parse(line);
-                                allCardsData.push(card);
-                                cardLookup[`${card.arena_id}_${card.set_code}`] = card;
-                                loadedCards++;
-                                
-                                // Update progress every 100 cards
-                                if (loadedCards % 100 === 0) {
-                                    const progress = Math.min((loadedCards / totalEstimated) * 100, 100);
-                                    progressBar.style.width = progress + '%';
-                                    progressBar.textContent = `${loadedCards.toLocaleString()} / ${totalEstimated.toLocaleString()}`;
-                                }
-                            } catch (e) {
-                                console.warn('Failed to parse card:', line.substring(0, 100));
-                            }
-                        }
-                    }
-                }
-                
-                // Process final buffer
-                if (buffer.trim()) {
+                const lines = text.split('\n').filter(l => l.trim());
+                lines.forEach(line => {
                     try {
-                        const card = JSON.parse(buffer);
-                        allCardsData.push(card);
-                        cardLookup[`${card.arena_id}_${card.set_code}`] = card;
-                        loadedCards++;
-                    } catch (e) {
-                        console.warn('Failed to parse final card:', buffer.substring(0, 100));
-                    }
-                }
+                        cards.push(JSON.parse(line));
+                    } catch(e) {}
+                });
                 
-                // Complete loading
-                progressBar.style.width = '100%';
-                progressBar.textContent = 'Complete!';
-                
-                console.log(`✅ Loaded ${allCardsData.length.toLocaleString()} cards via streaming`);
-                
-                // Initialize the table with all data
-                await initializeTable();
+                updateProgress('Complete!', 'Ready!', 100);
+                setupTable();
                 
             } catch (error) {
-                console.error('Failed to load dataset:', error);
-                showLoadingError();
+                showError('Load failed: ' + error.message);
             }
         }
         
-        async function initializeTable() {
-            // Generate table rows
-            const tbody = document.getElementById('cardsTableBody');
-            tbody.innerHTML = generateTableRows(allCardsData);
+        function setupTable() {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = cards.map(card => 
+                '<tr>' +
+                '<td>' + (card.name || '') + '</td>' +
+                '<td>' + (card.type_line || card.types || '') + '</td>' +
+                '<td>' + (card.set_code || '') + '</td>' +
+                '<td>' + (card.rarity || '') + '</td>' +
+                '</tr>'
+            ).join('');
             
-            // Initialize DataTable
-            currentTable = $('#cardsTable').DataTable({
-                pageLength: 25,
-                responsive: true,
-                order: [[1, 'asc']], // Sort by name
-                columnDefs: [
-                    { orderable: false, targets: [0] }, // Image column not sortable
-                    { searchable: false, targets: [0] } // Image column not searchable
-                ],
-                dom: 'lrtip' // Remove default search box since we have custom one
+            table = $('#cardsTable').DataTable({
+                pageLength: 50
             });
             
-            // Setup search and filter functionality
-            setupSearchAndFilters();
-            
-            // Hide loading, show content
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('searchSection').style.display = 'block';
-            document.getElementById('tableSection').style.display = 'block';
-            
-            isDataLoaded = true;
-            
-            // Add click handlers for card details
-            $('#cardsTable tbody').on('click', 'tr.clickable-row', function() {
-                const cardId = $(this).data('card-id');
-                const card = cardLookup[cardId];
-                if (card) {
-                    showCardDetails(card);
-                }
-            });
-        }
-        
-        function generateTableRows(cards) {
-            return cards.map(card => `
-                <tr class="clickable-row" data-card-id="${card.arena_id}_${card.set_code}">
-                    <td>
-                        ${card.image_uris_normal ? 
-                            `<img src="${card.image_uris_normal}" class="card-image" alt="${escapeHtml(card.name)}" loading="lazy">` : 
-                            '<div class="card-image bg-light d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>'
-                        }
-                    </td>
-                    <td><strong>${escapeHtml(card.name)}</strong></td>
-                    <td><span class="mana-cost">${escapeHtml(card.mana_cost || '')}</span></td>
-                    <td>${escapeHtml(card.type_line || card.types || '')}</td>
-                    <td><span class="rarity-${card.rarity}">${capitalize(card.rarity || 'unknown')}</span></td>
-                    <td>
-                        <span class="badge bg-secondary">${card.set_code}</span>
-                        ${card.set_name ? `<br><small>${escapeHtml(card.set_name)}</small>` : ''}
-                    </td>
-                    <td>
-                        <span class="badge badge-source ${card.source === 'both' ? 'bg-success' : 'bg-warning'}">${card.source === 'both' ? 'Matched' : '17Lands'}</span>
-                    </td>
-                    <td>${card.arena_id}</td>
-                </tr>
-            `).join('');
-        }
-        
-        function setupSearchAndFilters() {
-            // Global search functionality
-            $('#globalSearch').on('keyup', function() {
-                applyUnifiedFilter();
+            $('#searchBox').on('keyup', function() {
+                table.search(this.value).draw();
             });
             
-            // Add event listeners to filter inputs for real-time filtering
-            $('#rarityFilter, #sourceFilter').on('change', function() {
-                applyUnifiedFilter();
-            });
-            
-            $('#manaCostFilter, #setFilter').on('keyup', function() {
-                applyUnifiedFilter();
-            });
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('search').style.display = 'block';
+                document.getElementById('tableRow').style.display = 'block';
+            }, 300);
         }
         
-        function showLoadingError() {
-            document.getElementById('loadingSection').innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <div class="loading-section">
-                            <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
-                            <h5 class="mt-3 mb-2 text-danger">Failed to Load Dataset</h5>
-                            <p class="text-muted mb-3">There was an error loading the card database.</p>
-                            <button class="btn btn-primary" onclick="location.reload()">
-                                <i class="fas fa-redo"></i> Retry
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function updateProgress(title, text, percent) {
+            document.getElementById('loadTitle').textContent = title;
+            document.getElementById('loadText').textContent = text;
+            document.getElementById('progress').style.width = percent + '%';
+            document.getElementById('progress').textContent = Math.round(percent) + '%';
         }
         
-        function applyUnifiedFilter() {
-            if (!isDataLoaded || !currentTable) return;
-            
-            // Get search box value
-            const searchText = document.getElementById('globalSearch').value.trim();
-            
-            // Get advanced filter values
-            const rarity = document.getElementById('rarityFilter').value;
-            const source = document.getElementById('sourceFilter').value;
-            const manaCost = document.getElementById('manaCostFilter').value.trim();
-            const setCode = document.getElementById('setFilter').value.trim();
-            
-            // Combine all search terms
-            let combinedSearch = [];
-            
-            // Add search box text first (most important)
-            if (searchText) {
-                combinedSearch.push(searchText);
-            }
-            
-            // Add filter criteria
-            if (rarity) {
-                combinedSearch.push(rarity);
-            }
-            
-            if (source) {
-                // Convert source filter to searchable text
-                if (source === 'both') {
-                    combinedSearch.push('Matched');
-                } else if (source === 'lands_only') {
-                    combinedSearch.push('17Lands');
-                }
-            }
-            
-            if (manaCost) {
-                combinedSearch.push(manaCost);
-            }
-            
-            if (setCode) {
-                combinedSearch.push(setCode.toUpperCase());
-            }
-            
-            // Apply the combined search
-            currentTable.search(combinedSearch.join(' ')).draw();
-        }
-        
-        function clearAdvancedFilters() {
-            document.getElementById('rarityFilter').value = '';
-            document.getElementById('sourceFilter').value = '';
-            document.getElementById('manaCostFilter').value = '';
-            document.getElementById('setFilter').value = '';
-            document.getElementById('globalSearch').value = '';
-            
-            // Use unified filter to clear everything
-            applyUnifiedFilter();
-        }
-        
-        function showCardDetails(card) {
-            const modalBody = document.getElementById('cardDetailBody');
-            const scryfallLink = document.getElementById('scryfallLink');
-            
-            // Generate detailed card information
-            const detailsHTML = `
-                <div class="row">
-                    <div class="col-md-5">
-                        ${card.image_uris_normal ? 
-                            `<img src="${card.image_uris_normal}" class="img-fluid rounded" alt="${escapeHtml(card.name)}">` : 
-                            '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;"><i class="fas fa-image fa-3x text-muted"></i></div>'
-                        }
-                    </div>
-                    <div class="col-md-7">
-                        <h4>${escapeHtml(card.name)}</h4>
-                        <p><strong>Mana Cost:</strong> ${escapeHtml(card.mana_cost || 'N/A')}</p>
-                        <p><strong>Type:</strong> ${escapeHtml(card.type_line || card.types || 'N/A')}</p>
-                        <p><strong>Rarity:</strong> <span class="rarity-${card.rarity}">${capitalize(card.rarity || 'unknown')}</span></p>
-                        <p><strong>Set:</strong> ${card.set_code} - ${escapeHtml(card.set_name || 'Unknown Set')}</p>
-                        <p><strong>Arena ID:</strong> ${card.arena_id}</p>
-                        <p><strong>Source:</strong> <span class="badge ${card.source === 'both' ? 'bg-success' : 'bg-warning'}">${card.source === 'both' ? 'Both Sources' : '17Lands Only'}</span></p>
-                        ${card.oracle_text ? `<p><strong>Oracle Text:</strong><br>${escapeHtml(card.oracle_text).replace(/\\n/g, '<br>')}</p>` : ''}
-                        ${card.power && card.toughness ? `<p><strong>Power/Toughness:</strong> ${card.power}/${card.toughness}</p>` : ''}
-                        ${card.loyalty ? `<p><strong>Loyalty:</strong> ${card.loyalty}</p>` : ''}
-                    </div>
-                </div>
-            `;
-            
-            modalBody.innerHTML = detailsHTML;
-            
-            // Set Scryfall link if available
-            if (card.scryfall_uri) {
-                scryfallLink.href = card.scryfall_uri;
-                scryfallLink.style.display = 'inline-block';
-            } else {
-                scryfallLink.style.display = 'none';
-            }
-            
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('cardDetailModal'));
-            modal.show();
-        }
-        
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function showError(msg) {
+            document.getElementById('loading').innerHTML = 
+                '<div class="card"><div class="card-body text-center">' +
+                '<h5 class="text-danger">Error</h5>' +
+                '<p>' + msg + '</p>' +
+                '<button class="btn btn-primary" onclick="location.reload()">Retry</button>' +
+                '</div></div>';
         }
     </script>
 </body>

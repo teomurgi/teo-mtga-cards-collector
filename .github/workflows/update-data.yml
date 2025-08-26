@@ -37,13 +37,13 @@ jobs:
     - name: Collect MTG cards data
       run: |
         echo "Starting data collection at $(date)"
-        npm run collect -- --verbose --output docs/mtg_cards.jsonl
+        npm run collect -- --verbose --output docs/mtga_cards.jsonl
         echo "Data collection completed at $(date)"
     
     - name: Generate statistics
       run: |
         echo "Generating collection statistics..."
-        npm run info docs/mtg_cards.jsonl > docs/stats.txt
+        npm run info docs/mtga_cards.jsonl > docs/stats.txt
     
     - name: Generate HTML page
       run: |

@@ -40,7 +40,7 @@ npm run collect
 npm run info
 ```
 
-This generates `mtg_cards.jsonl` with 22,174 cards including:
+This generates `mtga_cards.jsonl` with 22,174 cards including:
 - 19,671 cards matched across both sources (88.7%)
 - 683 split/transform cards with 100% coverage
 - Complete Arena metadata + Scryfall enrichment
@@ -92,7 +92,7 @@ npm run dev -- collect \
   --output "my_cards.jsonl"
 
 # View collection statistics
-npm run dev -- info mtg_cards.jsonl
+npm run dev -- info mtga_cards.jsonl
 ```
 
 ### Available Commands
@@ -109,7 +109,7 @@ npm run dev -- info mtg_cards.jsonl
 |--------|-------------|---------|
 | `--scryfall-url` | Custom Scryfall JSON URL | **Auto-fetched latest daily export** |
 | `--lands-url` | Custom 17Lands CSV URL | Latest cards.csv |
-| `--output` | Output filename | `mtg_cards.jsonl` |
+| `--output` | Output filename | `mtga_cards.jsonl` |
 | `--verbose` | Detailed logging | `false` |
 
 ## 🗃️ Data Sources

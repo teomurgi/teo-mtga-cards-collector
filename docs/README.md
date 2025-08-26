@@ -5,7 +5,7 @@ This directory contains automatically generated MTG card data and web interface.
 ## Files
 
 - `index.html` - Interactive web interface with card browser
-- `mtg_cards.jsonl` - Complete card collection in JSONL format  
+- `mtga_cards.jsonl` - Complete card collection in JSONL format  
 - `collection-stats.json` - Collection statistics for automation
 - `stats.txt` - Human-readable collection statistics
 
