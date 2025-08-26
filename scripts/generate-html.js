@@ -477,13 +477,21 @@ function generateHTML() {
                                         <option value="">All Sets</option>
                                     </select>
                                 </div>
-                                <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="col-lg-2 col-md-6 mb-3">
                                     <label class="form-label">Type</label>
                                     <select class="form-select" id="typeFilter">
                                         <option value="">All Types</option>
                                     </select>
                                 </div>
                                 <div class="col-lg-2 col-md-6 mb-3">
+                                    <label class="form-label">Booster</label>
+                                    <select class="form-select" id="boosterFilter">
+                                        <option value="">All Cards</option>
+                                        <option value="yes">In Boosters</option>
+                                        <option value="no">Not in Boosters</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-1 col-md-6 mb-3">
                                     <label class="form-label">&nbsp;</label>
                                     <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
                                         <i class="fas fa-eraser me-1"></i>Clear
@@ -505,6 +513,7 @@ function generateHTML() {
                                         <th>Type</th>
                                         <th width="80">Set</th>
                                         <th width="100">Rarity</th>
+                                        <th width="80">Booster</th>
                                         <th width="100">Arena ID</th>
                                     </tr>
                                 </thead>
@@ -722,6 +731,10 @@ function generateHTML() {
                     '<td class="type-line">' + (card.type_line || card.types || '') + '</td>' +
                     '<td><strong>' + (card.set_code || card.set || '').toUpperCase() + '</strong></td>' +
                     '<td class="' + rarityClass + '">' + (card.rarity || 'Unknown') + '</td>' +
+                    '<td class="text-center">' + 
+                        '<span class="badge ' + (card.is_booster ? 'bg-success' : 'bg-secondary') + '">' +
+                        (card.is_booster ? 'Yes' : 'No') + '</span>' +
+                    '</td>' +
                     '<td class="text-center">' + (card.arena_id || '—') + '</td>' +
                 '</tr>';
             }).join('');
@@ -766,6 +779,18 @@ function generateHTML() {
             $('#typeFilter').on('change', function() {
                 table.column(3).search(this.value, false, true).draw();
             });
+            
+            // Booster filter
+            $('#boosterFilter').on('change', function() {
+                const value = this.value;
+                if (value === 'yes') {
+                    table.column(6).search('^Yes$', true, false).draw();
+                } else if (value === 'no') {
+                    table.column(6).search('^No$', true, false).draw();
+                } else {
+                    table.column(6).search('', true, false).draw();
+                }
+            });
         }
         
         function clearFilters() {
@@ -773,6 +798,7 @@ function generateHTML() {
             document.getElementById('rarityFilter').value = '';
             document.getElementById('setFilter').value = '';
             document.getElementById('typeFilter').value = '';
+            document.getElementById('boosterFilter').value = '';
             table.search('').columns().search('').draw();
         }
         
@@ -829,13 +855,21 @@ function generateHTML() {
                                     '<strong>Arena ID:</strong><br>' +
                                     '<code>' + (card.arena_id || 'N/A') + '</code>' +
                                 '</div>' +
-                                (card.power !== undefined ? 
+                                '<div class="col-6">' +
+                                    '<strong>Available in Boosters:</strong><br>' +
+                                    '<span class="badge ' + (card.is_booster ? 'bg-success' : 'bg-secondary') + '">' +
+                                    (card.is_booster ? 'Yes' : 'No') + '</span>' +
+                                '</div>' +
+                            '</div>' +
+                            
+                            (card.power !== undefined ? 
+                                '<div class="row mb-3">' +
                                     '<div class="col-6">' +
                                         '<strong>Power/Toughness:</strong><br>' +
                                         '<span class="badge bg-secondary">' + card.power + '/' + card.toughness + '</span>' +
-                                    '</div>' : ''
-                                ) +
-                            '</div>' +
+                                    '</div>' +
+                                '</div>' : ''
+                            ) +
                             
                             (card.oracle_text ? 
                                 '<div class="mb-3">' +
