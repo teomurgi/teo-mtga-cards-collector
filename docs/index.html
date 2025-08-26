@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTG Arena Cards Collection</title>
+    <title>MTG Arena Cards Collection - Magic The Gathering Card Database & Explorer</title>
+    <meta name="description" content="Comprehensive Magic The Gathering Arena card collection database. Browse, search and explore MTG cards with detailed stats, rarity filters, and interactive features. Unofficial MTG card explorer.">
+    <meta name="keywords" content="MTG, Magic The Gathering, MTG Arena, Magic cards, card database, MTG collection, Magic card explorer, MTG card search, Magic card browser, trading cards, Wizards of the Coast, MTG stats, card rarity, mana cost, Magic spells">
+    <meta name="author" content="MTG Arena Cards Collector">
+    <meta property="og:title" content="MTG Arena Cards Collection - Magic The Gathering Database">
+    <meta property="og:description" content="Explore thousands of Magic The Gathering Arena cards with advanced search and filtering capabilities.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MTG Arena Cards Collection">
+    <meta name="twitter:description" content="Interactive Magic The Gathering Arena card database and explorer.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -263,6 +272,66 @@
             margin-top: 15px;
             display: inline-block;
         }
+        
+        /* Footer Styles */
+        .footer-section {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            color: white;
+            padding: 40px 0;
+            margin-top: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .footer-content {
+            text-align: center;
+        }
+        
+        .github-buttons {
+            margin: 25px 0;
+        }
+        
+        .github-btn {
+            background: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .github-btn:hover {
+            background: linear-gradient(135deg, #2f363d 0%, #24292e 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        
+        .github-btn i {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+        
+        .disclaimer {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px auto;
+            max-width: 800px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .author-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -274,7 +343,7 @@
                 <p class="lead fs-4">Comprehensive database with 22,174 cards</p>
                 <div class="generation-date">
                     <i class="fas fa-clock me-2"></i>
-                    Generated: August 26, 2025 at 11:11 AM GMT+2
+                    Generated: August 26, 2025 at 11:16 AM GMT+2
                 </div>
             </div>
 
@@ -408,6 +477,58 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer-section">
+            <div class="container">
+                <div class="footer-content">
+                    <h4><i class="fas fa-magic me-2"></i>MTG Arena Cards Collection</h4>
+                    <p class="mb-3">Explore the magical world of Magic: The Gathering Arena cards</p>
+                    
+                    <div class="github-buttons">
+                        <a href="https://github.com/teomurgi/teo-mtga-cards-collector" target="_blank" class="github-btn">
+                            <i class="fab fa-github"></i>
+                            View on GitHub
+                        </a>
+                        <a href="https://github.com/teomurgi/teo-mtga-cards-collector/stargazers" target="_blank" class="github-btn">
+                            <i class="fas fa-star"></i>
+                            Star this Repository
+                        </a>
+                        <a href="https://github.com/teomurgi" target="_blank" class="github-btn">
+                            <i class="fas fa-user"></i>
+                            Follow Author
+                        </a>
+                    </div>
+                    
+                    <div class="disclaimer">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Disclaimer</h6>
+                        <p class="mb-2">
+                            This website is <strong>unofficial</strong> and is not affiliated with, endorsed, sponsored, or specifically approved by 
+                            <strong>Wizards of the Coast LLC</strong>. This site may use the trademarks and other intellectual property of 
+                            Wizards of the Coast LLC, which is permitted under Wizards' Fan Site Policy.
+                        </p>
+                        <p class="mb-0">
+                            <strong>Magic: The Gathering</strong> and <strong>MTG Arena</strong> are trademarks of Wizards of the Coast LLC 
+                            in the USA and other countries. Card data is sourced from Scryfall API and 17Lands for educational and 
+                            informational purposes only.
+                        </p>
+                    </div>
+                    
+                    <div class="author-info">
+                        <p class="mb-1">
+                            <i class="fas fa-code me-2"></i>Built with ❤️ by 
+                            <a href="https://github.com/teomurgi" target="_blank" class="text-light">
+                                <strong>teomurgi</strong>
+                            </a>
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-database me-2"></i>Card data updated regularly | 
+                            <i class="fas fa-clock me-2"></i>Generated on 8/26/2025
+                        </p>
                     </div>
                 </div>
             </div>
