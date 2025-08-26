@@ -343,29 +343,13 @@
                 <p class="lead fs-4">Comprehensive database with 22,174 cards</p>
                 <div class="generation-date">
                     <i class="fas fa-clock me-2"></i>
-                    Generated: August 26, 2025 at 11:16 AM GMT+2
+                    Generated: August 26, 2025 at 12:10 PM GMT+2
                 </div>
             </div>
 
             <div class="p-4">
                 <!-- Stats Row -->
                 <div class="row mb-4">
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100">
-                            <div class="card-body text-center">
-                                <h3 class="text-primary">22,174</h3>
-                                <p class="mb-0">Total Cards</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100">
-                            <div class="card-body text-center">
-                                <h3 class="text-success">22,107</h3>
-                                <p class="mb-0">Matched Cards</p>
-                            </div>
-                        </div>
-                    </div>
                     <div class="col-md-3 mb-3">
                         <div class="card download-card h-100">
                             <div class="card-body text-center">
@@ -386,6 +370,22 @@
                                 <small class="d-block mt-2 opacity-75">
                                     ~22.1 MB download
                                 </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="text-primary">22,174</h3>
+                                <p class="mb-0">Total Cards</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="text-success">22,107</h3>
+                                <p class="mb-0">Matched Cards</p>
                             </div>
                         </div>
                     </div>
@@ -657,7 +657,17 @@
             if (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris) {
                 return card.card_faces[0].image_uris.small;
             }
-            return '';
+            return null; // Return null instead of empty string to indicate no image
+        }
+        
+        function getCardPlaceholder() {
+            // Beautiful MTG-style card placeholder using base64 encoded SVG
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNTYiIHZpZXdCb3g9IjAgMCA0MCA1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NjdlZWE7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6Izc2NGJhMjtzdG9wLW9wYWNpdHk6MSIgLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgZmlsbD0idXJsKCNncmFkKSIgcng9IjMiIHJ5PSIzIi8+CiAgPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjUyIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMSIgcng9IjIiIHJ5PSIyIiBvcGFjaXR5PSIwLjMiLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMCwyOCkiPgogICAgPGNpcmNsZSBjeD0iMCIgY3k9Ii02IiByPSI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMS41IiBvcGFjaXR5PSIwLjciLz4KICAgIDxwYXRoIGQ9Ik0tNCwyIEwwLDYgTDQsMiIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC43Ii8+CiAgPC9nPgo8L3N2Zz4K';
+        }
+        
+        function getCardPlaceholderLarge() {
+            // Large version for modal
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQyMCIgdmlld0JveD0iMCAwIDMwMCA0MjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRMYXJnZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM2NjdlZWE7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6Izc2NGJhMjtzdG9wLW9wYWNpdHk6MSIgLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDIwIiBmaWxsPSJ1cmwoI2dyYWRMYXJnZSkiIHJ4PSIxNSIgcnk9IjE1Ii8+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjQwMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIgcnk9IjEwIiBvcGFjaXR5PSIwLjMiLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTAsMjEwKSI+CiAgICA8Y2lyY2xlIGN4PSIwIiBjeT0iLTMwIiByPSI0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjMiIG9wYWNpdHk9IjAuNyIvPgogICAgPHBhdGggZD0iTTAsMTUgTDAsMzUgTTEwLDI1IEwtMTAsMjUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjciLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjcwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIG9wYWNpdHk9IjAuOCI+Tm8gSW1hZ2U8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K';
         }
         
         function setupTable() {
@@ -669,7 +679,7 @@
                 
                 return '<tr class="clickable-row" onclick="showCardDetails(' + index + ')">' +
                     '<td class="text-center">' +
-                        '<img src="' + imageUrl + '" class="card-image" loading="lazy" ' +
+                        '<img src="' + (imageUrl || getCardPlaceholder()) + '" class="card-image" loading="lazy" ' +
                              'title="' + (card.name || 'Unknown Card') + '">' +
                     '</td>' +
                     '<td><strong>' + (card.name || 'Unknown') + '</strong></td>' +
@@ -751,8 +761,7 @@
             
             const details = '<div class="row">' +
                     '<div class="col-lg-5">' +
-                        (imageUrl ? '<img src="' + imageUrl + '" class="card-detail-image w-100" alt="' + (card.name || '') + '">' :
-                         '<div class="card-detail-image w-100 bg-light d-flex align-items-center justify-content-center" style="height: 300px;"><i class="fas fa-image fa-3x text-muted"></i></div>') +
+                        '<img src="' + (imageUrl || getCardPlaceholderLarge()) + '" class="card-detail-image w-100" alt="' + (card.name || '') + '">' +
                     '</div>' +
                     '<div class="col-lg-7">' +
                         '<div class="card-info">' +
