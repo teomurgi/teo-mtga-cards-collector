@@ -61,22 +61,3 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
     
-    - name: Create release with data
-      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Create a release with the generated data
-        DATE=$(date +%Y-%m-%d)
-        TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-        
-        # Get collection stats for release notes
-        TOTAL_CARDS=$(jq -r 'select(.total) | .total' docs/collection-stats.json || echo "Unknown")
-        BOTH_SOURCE=$(jq -r 'select(.source=="both") | .count' docs/collection-stats.json || echo "Unknown")
-        
-        # Create release with simpler notes to avoid YAML escaping issues
-        gh release create "data-$TIMESTAMP" \
-          docs/mtg_cards.jsonl \
-          --title "MTG Cards Data - $DATE" \
-          --notes "Daily MTG Arena Cards Collection - Total Cards: $TOTAL_CARDS - Cross-source Matches: $BOTH_SOURCE - Generated: $(date) - Data Sources: 17Lands + Scryfall - View Online: https://teomurgi.github.io/teo-mtga-cards-collector/" \
-          --latest
